@@ -1,0 +1,11 @@
+{
+	"id": "time-control",
+	"name": "Time Control",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Taking control of my time.",
+	"author": "bulany",
+	"authorUrl": "https://github.com/bulany",
+	"fundingUrl": "https://github.com/bulany",
+	"isDesktopOnly": false
+}
