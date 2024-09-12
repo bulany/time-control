@@ -2,8 +2,10 @@
 
 All notable changes to the "time-control" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
 ## [Unreleased]
 
-- Initial release
+Tried to make a VSCode extension. Couldn't get Tone JS to make sound.
+
+## [0.0.1] - 2024-09-12
+
+Try to make an Obsidian plugin instead.
