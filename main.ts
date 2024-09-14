@@ -1,5 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
+import * as Tone from 'tone';
 
 interface TimeControlSettings {
 	mySetting: string;
@@ -11,14 +11,19 @@ const DEFAULT_SETTINGS: TimeControlSettings = {
 
 export default class TimeControl extends Plugin {
 	settings: TimeControlSettings;
+	synth: Tone.Synth;
+	timer: number | null = null;
+	secondsRemaining: number = 0;
 
 	async onload() {
 		await this.loadSettings();
+		this.synth = new Tone.Synth().toDestination();
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Time Control', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			this.startTimer();
+			new Notice('Timer started');
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -78,8 +83,41 @@ export default class TimeControl extends Plugin {
 	}
 
 	onunload() {
-
+		this.clearTimer();
 	}
+
+	startTimer() {
+		this.clearTimer();
+		this.secondsRemaining = 5;
+		this.playSound();
+		this.timer = window.setInterval(() => {
+			this.secondsRemaining--;
+			if (this.secondsRemaining > 0) {
+				this.playSound();
+			} else {
+				this.clearTimer();
+				this.playSound2();
+				new Notice('Timer finished');
+			}
+		}, 1000)
+	}
+
+	clearTimer() {
+		if (this.timer) {
+			clearInterval(this.timer);
+			this.timer = null;
+		}
+	}
+
+	playSound() {
+		this.synth.triggerAttackRelease('C4', '32n');
+		
+	}
+
+	playSound2() {
+		this.synth.triggerAttackRelease('C4', '8n');
+	}
+
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
