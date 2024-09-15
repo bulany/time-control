@@ -23,14 +23,13 @@ export default class TimeControl extends Plugin {
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Time Control', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			this.startTimer();
-			new Notice('Timer started');
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+		statusBarItemEl.setText('time-control text');
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
@@ -89,6 +88,7 @@ export default class TimeControl extends Plugin {
 	startTimer() {
 		this.clearTimer();
 		this.secondsRemaining = 5;
+		new Notice('Timer started!');
 		this.playSound();
 		this.timer = window.setInterval(() => {
 			this.secondsRemaining--;
@@ -100,6 +100,7 @@ export default class TimeControl extends Plugin {
 				new Notice('Timer finished');
 			}
 		}, 1000)
+		this.registerInterval(this.timer)
 	}
 
 	clearTimer() {
