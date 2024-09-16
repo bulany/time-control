@@ -9,6 +9,12 @@ const DEFAULT_SETTINGS: TimeControlSettings = {
 	mySetting: 'default'
 }
 
+const ALL_EMOJIS: Record<string, string> = {
+  ":+1:": "👍",
+  ":sunglasses:": "😎",
+  ":smile:": "😄",
+};
+
 export default class TimeControl extends Plugin {
 	settings: TimeControlSettings;
 	synth: Tone.Synth;
@@ -26,6 +32,21 @@ export default class TimeControl extends Plugin {
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
+
+    this.registerMarkdownPostProcessor((element, context) => {
+			console.log('hello');
+      const codeblocks = element.findAll("code");
+
+      for (let codeblock of codeblocks) {
+        const text = codeblock.innerText.trim();
+        if (text[0] === ":" && text[text.length - 1] === ":") {
+          const emojiEl = codeblock.createSpan({
+            text: ALL_EMOJIS[text] ?? text,
+          });
+          codeblock.replaceWith(emojiEl);
+        }
+      }
+    });
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
@@ -74,7 +95,7 @@ export default class TimeControl extends Plugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+			console.log('click me', evt);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
