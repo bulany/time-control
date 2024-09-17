@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { Plugin, Notice } from 'obsidian';
 
 import { Settings } from './settings';
 import { SettingsTab } from './ui/settingsWindow';
@@ -9,8 +9,12 @@ import { CmRendererPlugin } from './ui/cmRenderer';
 import { InputSuggester } from './ui/inputSuggester';
 import { TextProcessor } from './mapper/textProcessor';
 
-export default class TokenzPlugin extends Plugin
+import * as Tone from 'tone';
+
+export default class TimeControlPlugin extends Plugin
 {
+    synth: Tone.Synth | undefined;
+
     override async onload()
     {
         // load core plugin modules
@@ -25,12 +29,18 @@ export default class TokenzPlugin extends Plugin
         this.registerMarkdownPostProcessor(ObsidianRenderer.processTokens);
         this.registerEditorSuggest(new InputSuggester(this, codeMaps));
 
-        console.log('Tokenz loaded!');
+        console.log('Time control loaded!');
+        this.synth = new Tone.Synth().toDestination();
+        this.synth.triggerAttackRelease('C4', '32n');
+        new Notice('Time control loaded');
+
+        	
     }
 
     override onunload(): void
     {
-        console.log('Tokenz unloaded!');
+        this.synth.triggerAttackRelease('E4', '8n');
+        console.log('Time control unloaded!');
     }
 
     async loadSettings() {

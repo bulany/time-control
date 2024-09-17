@@ -1,12 +1,11 @@
 {
     "name": "tokenz",
     "version": "0.74",
-	"description": "Insert shortcodes into your document, e.g smileys :) or emojis :wink: . User-defined short code maps are also supported.",
+    "description": "Insert shortcodes into your document, e.g smileys :) or emojis :wink: . User-defined short code maps are also supported.",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs",
         "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-
         "syntax": "npm -s run syntax_silent",
         "syntax_silent": "run-script-os",
         "syntax_silent:win32": "@echo Syntax check... && tsc -noEmit && @echo Syntax check: Okay, no errors!",
@@ -30,6 +29,7 @@
         "@codemirror/view": "^6.29.0",
         "builtin-modules": "^4.0.0",
         "node": "^21.2.0",
+        "tone": "^15.0.4",
         "tslib": "^2.6.3"
     }
 }
