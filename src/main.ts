@@ -39,7 +39,7 @@ export default class TimeControlPlugin extends Plugin
 
     override onunload(): void
     {
-        this.synth.triggerAttackRelease('E4', '8n');
+        this.synth?.triggerAttackRelease('E4', '8n');
         console.log('Time control unloaded!');
     }
 

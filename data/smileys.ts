@@ -1,7 +1,7 @@
 export const smileys = JSON.parse(
 `{
     ":-)":      [ "🙂", "smiley, happy face" ],
-    ":)":       [ "🙂", "smiley, happy face" ],
+    ":)":       [ "🙂", "smiley, happy face", "C4:32n" ],
     ":-]":      [ "🙂", "smiley, happy face" ],
     ":]":       [ "🙂", "smiley, happy face" ],
     ":->":      [ "😊", "smiley, happy face" ],

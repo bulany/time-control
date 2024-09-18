@@ -27,6 +27,8 @@ import
     InputMatchType,
 } from "../mapper/textProcessor";
 
+import * as Tone from 'tone';
+
 class TokenReplacerWidget extends WidgetType
 {
     text = '-';
@@ -56,10 +58,15 @@ class TokenReplacerWidget extends WidgetType
 export class CmRendererPlugin implements PluginValue
 {
     decorations: DecorationSet;
+    synth: Tone.Synth | undefined;
 
     constructor(view: EditorView)
     {
         this.decorations = this.buildDecorations(view);
+
+        this.synth = new Tone.Synth().toDestination();
+        this.synth.triggerAttackRelease('G4', '32n');
+        console.log('2nd Synth loaded!');
     }
 
     public static build()
@@ -102,8 +109,11 @@ export class CmRendererPlugin implements PluginValue
     addDecorationCB(builder: RangeSetBuilder<Decoration>, allText: string, range: [number, number], decoration: string | null, matchType: InputMatchType): string | null
     {
         // replace the token to the appropriate icon (or just highlight the code near to the cursor)
-        if (decoration)
+        if (decoration) {
             builder.add(range[0], range[1] + 1, Decoration.replace({ widget: new TokenReplacerWidget(decoration) }));
+            console.log('addDeco', decoration);
+            this.synth?.triggerAttackRelease('C5', '8n');
+        }
         else if (matchType !== InputMatchType.None)
         {
             let textClass = '';
