@@ -59,14 +59,12 @@ export class CmRendererPlugin implements PluginValue
 {
     decorations: DecorationSet;
     synth: Tone.Synth | undefined;
+    decoSet : Boolean = false;
 
     constructor(view: EditorView)
     {
         this.decorations = this.buildDecorations(view);
-
-        this.synth = new Tone.Synth().toDestination();
-        this.synth.triggerAttackRelease('G4', '32n');
-        console.log('2nd Synth loaded!');
+        this.initAudio();
     }
 
     public static build()
@@ -79,6 +77,16 @@ export class CmRendererPlugin implements PluginValue
             CmRendererPlugin,
             pluginSpec,
         );
+    }
+
+    async initAudio() {
+        await Tone.start();
+        this.synth = new Tone.Synth().toDestination();
+        this.playSound('G6', '32n');
+    }
+
+    playSound(note : Tone.Unit.Frequency, time : Tone.Unit.Time) {
+        this.synth?.triggerAttackRelease(note, time);
     }
 
     update(update: ViewUpdate)
@@ -111,8 +119,10 @@ export class CmRendererPlugin implements PluginValue
         // replace the token to the appropriate icon (or just highlight the code near to the cursor)
         if (decoration) {
             builder.add(range[0], range[1] + 1, Decoration.replace({ widget: new TokenReplacerWidget(decoration) }));
-            console.log('addDeco', decoration);
-            this.synth?.triggerAttackRelease('C5', '8n');
+            if (!this.decoSet) {
+                this.playSound('C4', '16n');
+                this.decoSet = true;
+            }
         }
         else if (matchType !== InputMatchType.None)
         {
