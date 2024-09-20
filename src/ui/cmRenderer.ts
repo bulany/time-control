@@ -43,6 +43,10 @@ class TokenReplacerWidget extends WidgetType
 
     toDOM(view: EditorView): HTMLElement
     {
+        const outer = document.createElement('span');
+        const button = document.createElement('button');
+        button.innerText = 'hello';
+        button.onclick = () => { console.log('clicked'); }
         const span = document.createElement('span');
 
         span.innerText = this.text;
@@ -51,7 +55,9 @@ class TokenReplacerWidget extends WidgetType
             span.classList.add(this.cls);
         }
 
-        return span;
+        outer.appendChild(span);
+        outer.appendChild(button);
+        return outer;
     }
 }
 
