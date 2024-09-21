@@ -27,7 +27,6 @@ import
     InputMatchType,
 } from "../mapper/textProcessor";
 
-import * as Tone from 'tone';
 
 class TokenReplacerWidget extends WidgetType
 {
@@ -64,13 +63,11 @@ class TokenReplacerWidget extends WidgetType
 export class CmRendererPlugin implements PluginValue
 {
     decorations: DecorationSet;
-    synth: Tone.Synth | undefined;
     decoSet : Boolean = false;
 
     constructor(view: EditorView)
     {
         this.decorations = this.buildDecorations(view);
-        this.initAudio();
     }
 
     public static build()
@@ -83,16 +80,6 @@ export class CmRendererPlugin implements PluginValue
             CmRendererPlugin,
             pluginSpec,
         );
-    }
-
-    async initAudio() {
-        await Tone.start();
-        this.synth = new Tone.Synth().toDestination();
-        this.playSound('G6', '32n');
-    }
-
-    playSound(note : Tone.Unit.Frequency, time : Tone.Unit.Time) {
-        this.synth?.triggerAttackRelease(note, time);
     }
 
     update(update: ViewUpdate)
@@ -123,10 +110,11 @@ export class CmRendererPlugin implements PluginValue
     addDecorationCB(builder: RangeSetBuilder<Decoration>, allText: string, range: [number, number], decoration: string | null, matchType: InputMatchType): string | null
     {
         // replace the token to the appropriate icon (or just highlight the code near to the cursor)
+        console.log('add decoration', decoration);
         if (decoration) {
             builder.add(range[0], range[1] + 1, Decoration.replace({ widget: new TokenReplacerWidget(decoration) }));
             if (!this.decoSet) {
-                this.playSound('C4', '16n');
+                console.log('add decoration: first time', decoration);
                 this.decoSet = true;
             }
         }

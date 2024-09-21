@@ -9,11 +9,8 @@ import { CmRendererPlugin } from './ui/cmRenderer';
 import { InputSuggester } from './ui/inputSuggester';
 import { TextProcessor } from './mapper/textProcessor';
 
-import * as Tone from 'tone';
-
 export default class TimeControlPlugin extends Plugin
 {
-    synth: Tone.Synth | undefined;
 
     override async onload()
     {
@@ -25,21 +22,17 @@ export default class TimeControlPlugin extends Plugin
 
         // load UI modules
         TextProcessor.instance.codeMaps = codeMaps;
+        console.log('onload: init synth');
+        await TextProcessor.instance.initAudio();
+        console.log('onload: synth init success');
         this.registerEditorExtension(CmRendererPlugin.build());
         this.registerMarkdownPostProcessor(ObsidianRenderer.processTokens);
         this.registerEditorSuggest(new InputSuggester(this, codeMaps));
-
-        console.log('Time control loaded!');
-        this.synth = new Tone.Synth().toDestination();
-        this.synth.triggerAttackRelease('C4', '32n');
-        new Notice('Time control loaded');
-
-        	
+        console.log('Time control loaded!');        	
     }
 
     override onunload(): void
     {
-        this.synth?.triggerAttackRelease('E4', '8n');
         console.log('Time control unloaded!');
     }
 

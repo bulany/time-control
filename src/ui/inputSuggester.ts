@@ -89,6 +89,7 @@ export class InputSuggester extends EditorSuggest<string>
                 const replaceStr = Settings.instance.bSuggestReplaceTokens ? value ?? '?' : suggestion + ' ';
                 this.context.editor.replaceRange(replaceStr, this.context.start, this.context.end);
                 this.context.editor.setCursor(this.context.start.line, this.context.start.ch + replaceStr.length);
+                console.log('selectSuggestion', replaceStr, value);
             }
         }
     }

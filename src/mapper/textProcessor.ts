@@ -1,5 +1,6 @@
 import { CodeMaps } from './codeMaps';
 import { Settings } from '../settings';
+import * as Tone from 'tone';
 
 type Selection = [number, number] | null;
 type DecorateCB = (allText: string, range: [number, number], replacement: string | null, matchType: InputMatchType) => string | null;
@@ -17,6 +18,8 @@ export  class TextProcessor
     static #instance: TextProcessor;    // nosonar
     // @ts-ignore next-line
     codeMaps: CodeMaps;
+
+    synth: Tone.Synth | undefined;
 
     private constructor() { }
 
@@ -36,7 +39,7 @@ export  class TextProcessor
     }
 
     processAllTokens(text: string, selection: Selection, decorateCB: DecorateCB) {
-        //!const origText = text;
+        const origText = text;
         let tokenBeg = -1, wasWS = true, i = -1;
         while (++i <= text.length)
         {
@@ -55,14 +58,14 @@ export  class TextProcessor
             }
             wasWS = isWS;
         }
-        // debug if (text !== origText)
-        // debug     console.log(`Text changed, ${origText}\r\n=>\r\n${text}`)
+        if (text !== origText)
+            console.log(`Text changed, ${origText}\r\n=>\r\n${text}`)
         return text;
     }
 
     processOneToken(text: string, match: [number, number], selection: [number, number] | null, decorateCB: DecorateCB): string | null
     {
-        // debug console.log(`Token! [${match[0]}, ${match[1]}]`);
+        //console.log(`Token! [${match[0]}, ${match[1]}]`);
         const word = text.substring(match[0], match[1]+1);
         const replacedText = this.codeMaps.getValueAll(word);
         const smileyEnd = match[1];
@@ -112,5 +115,17 @@ export  class TextProcessor
         }
 
         return overlap;
+    }
+
+    async initAudio() 
+    {
+        await Tone.start();
+        this.synth = new Tone.Synth().toDestination();
+        this.playSound('G6', '32n');
+    }
+
+    playSound(note : Tone.Unit.Frequency, time : Tone.Unit.Time) 
+    {
+        this.synth?.triggerAttackRelease(note, time);
     }
 }
