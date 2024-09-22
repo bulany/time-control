@@ -42,10 +42,6 @@ class TokenReplacerWidget extends WidgetType
 
     toDOM(view: EditorView): HTMLElement
     {
-        const outer = document.createElement('span');
-        const button = document.createElement('button');
-        button.innerText = 'hello';
-        button.onclick = () => { console.log('clicked'); }
         const span = document.createElement('span');
 
         span.innerText = this.text;
@@ -53,10 +49,8 @@ class TokenReplacerWidget extends WidgetType
         {
             span.classList.add(this.cls);
         }
-
-        outer.appendChild(span);
-        outer.appendChild(button);
-        return outer;
+        console.log('toDom:', this.text, this.cls);
+        return span;
     }
 }
 
@@ -113,6 +107,7 @@ export class CmRendererPlugin implements PluginValue
         console.log('add decoration', decoration);
         if (decoration) {
             builder.add(range[0], range[1] + 1, Decoration.replace({ widget: new TokenReplacerWidget(decoration) }));
+            console.log('addDeco - full match?');
             if (!this.decoSet) {
                 console.log('add decoration: first time', decoration);
                 this.decoSet = true;
@@ -129,6 +124,8 @@ export class CmRendererPlugin implements PluginValue
                 textClass = 'tz-highlight3';
             for (let i = 0; i < range[1] - range [0] + 1; i++)
                 builder.add(range[0] + i, range[0] + i + 1, Decoration.replace({ widget: new TokenReplacerWidget(allText.substring(range[0] + i, range[0] + i + 1), textClass) }));
+            console.log('addDeco - highlight', textClass);
+
         }
         return null;
     }
