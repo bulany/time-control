@@ -49,7 +49,6 @@ class TokenReplacerWidget extends WidgetType
         {
             span.classList.add(this.cls);
         }
-        console.log('toDom:', this.text, this.cls);
         return span;
     }
 }
@@ -81,8 +80,17 @@ export class CmRendererPlugin implements PluginValue
         // Disable in the source mode
         if (!update.state.field(editorLivePreviewField))
             this.decorations = Decoration.none;
-        else
+        else {
             this.decorations = this.buildDecorations(update.view);
+            console.log('built decos...');
+            let iter = this.decorations.iter();
+            while (iter.value) {
+                const text = update.view.state.doc.sliceString(iter.from, iter.to);
+                const deco = iter.value;
+                console.log(`   decoration ${iter.from} - ${iter.to} = ${text}`, deco?.widget.text);
+                iter.next();    
+            }
+        }
     }
 
     buildDecorations(view: EditorView): DecorationSet
@@ -104,14 +112,8 @@ export class CmRendererPlugin implements PluginValue
     addDecorationCB(builder: RangeSetBuilder<Decoration>, allText: string, range: [number, number], decoration: string | null, matchType: InputMatchType): string | null
     {
         // replace the token to the appropriate icon (or just highlight the code near to the cursor)
-        console.log('add decoration', decoration);
         if (decoration) {
             builder.add(range[0], range[1] + 1, Decoration.replace({ widget: new TokenReplacerWidget(decoration) }));
-            console.log('addDeco - full match?');
-            if (!this.decoSet) {
-                console.log('add decoration: first time', decoration);
-                this.decoSet = true;
-            }
         }
         else if (matchType !== InputMatchType.None)
         {
@@ -124,7 +126,6 @@ export class CmRendererPlugin implements PluginValue
                 textClass = 'tz-highlight3';
             for (let i = 0; i < range[1] - range [0] + 1; i++)
                 builder.add(range[0] + i, range[0] + i + 1, Decoration.replace({ widget: new TokenReplacerWidget(allText.substring(range[0] + i, range[0] + i + 1), textClass) }));
-            console.log('addDeco - highlight', textClass);
 
         }
         return null;
