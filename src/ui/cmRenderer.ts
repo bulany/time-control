@@ -53,10 +53,12 @@ class TokenReplacerWidget extends WidgetType
     }
 }
 
+
 export class CmRendererPlugin implements PluginValue
 {
     decorations: DecorationSet;
     decoSet : Boolean = false;
+    timerObjects : Array<Object> = [];
 
     constructor(view: EditorView)
     {
@@ -82,14 +84,6 @@ export class CmRendererPlugin implements PluginValue
             this.decorations = Decoration.none;
         else {
             this.decorations = this.buildDecorations(update.view);
-            console.log('built decos...');
-            let iter = this.decorations.iter();
-            while (iter.value) {
-                const text = update.view.state.doc.sliceString(iter.from, iter.to);
-                const deco = iter.value;
-                console.log(`   decoration ${iter.from} - ${iter.to} = ${text}`, deco?.widget.text);
-                iter.next();    
-            }
         }
     }
 
@@ -113,7 +107,11 @@ export class CmRendererPlugin implements PluginValue
     {
         // replace the token to the appropriate icon (or just highlight the code near to the cursor)
         if (decoration) {
-            builder.add(range[0], range[1] + 1, Decoration.replace({ widget: new TokenReplacerWidget(decoration) }));
+            const r1 = range[0];
+            const r2 = range[1] + 1;
+            const widget = new TokenReplacerWidget(decoration);
+            builder.add(r1, r2, Decoration.replace({ widget: widget }));
+            this.updateTimers(r1, r2, widget);
         }
         else if (matchType !== InputMatchType.None)
         {
@@ -129,5 +127,16 @@ export class CmRendererPlugin implements PluginValue
 
         }
         return null;
+    }
+
+    updateTimers(r1, r2, widget) {
+        const timer = {r1, r2, widget};
+        const index = this.timerObjects.findIndex(t => t.r1 == r1 && t.r2 == r2);
+        if (index == -1) {
+            this.timerObjects.push(timer);
+            console.log('adding new synth for', r1, r2);
+        } else {
+            this.timerObjects[index].widget = widget;
+        }
     }
 }
