@@ -1,4 +1,4 @@
-import { Plugin, Notice } from 'obsidian';
+import { Plugin, Notice, MarkdownPostProcessor, MarkdownView, Editor } from 'obsidian';
 
 import { Settings } from './settings';
 import { SettingsTab } from './ui/settingsWindow';
@@ -28,12 +28,34 @@ export default class TimeControlPlugin extends Plugin
         this.registerEditorExtension(CmRendererPlugin.build());
         this.registerMarkdownPostProcessor(ObsidianRenderer.processTokens);
         this.registerEditorSuggest(new InputSuggester(this, codeMaps));
-        console.log('Time control loaded!');        	
+        console.log('Time control loaded!');    
+        this.registerMarkdownPostProcessor(this.markDownPostProcessor);
+        this.registerEvent(this.app.workspace.on('editor-change', this.handleEditorChange));
     }
 
     override onunload(): void
     {
         console.log('Time control unloaded!');
+    }
+
+    handleEditorChange = (editor: Editor, view: MarkdownView) => {
+        view.previewMode.rerender(true);
+        console.log('hey there');
+    }
+
+    markDownPostProcessor: MarkdownPostProcessor = (el) => {
+        console.log('post proccing');
+        const timerRegex = /\[timer:\s*(\d+)m\]/g;
+        el.innerHTML.replace(timerRegex, (match, minutes)=>{
+            return `<button class="timer-button" data-minutes="${minutes}">${minutes}m Timer</button>`;
+        })
+
+        el.querySelectorAll('.timer-button').forEach(button => {
+            this.registerDomEvent(button, 'click', (evt) => {
+              // Implement timer start logic here
+              console.log(`Starting ${button.getAttribute('data-minutes')}m timer`);
+            });
+          });
     }
 
     async loadSettings() {
