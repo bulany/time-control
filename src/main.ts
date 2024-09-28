@@ -7,32 +7,55 @@ import {
 } from "@codemirror/view";
 import * as Tone from 'tone';
 
+const majorScale = 'C-D-E-F-G-A-B'.split('-');
+const modes = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
+
+function buildScale(startIndex) {
+    const out = [];
+    let octave = 4;
+    for (let i = 0; i <= majorScale.length; ++i) {
+        let j = i + startIndex;
+        if (j >= majorScale.length) {
+            j = j - majorScale.length;
+            octave++;
+        }
+        out.push(majorScale[j] + octave);
+    }
+    return out;
+}
+
+function buildModes() {
+    const out: Object = {};
+    modes.forEach((mode, i) => {
+        out[mode] = buildScale(i);
+    })
+
+    return out;
+}
+
+const modalScales = buildModes();
+console.log('modes', modalScales);
+
 class Synth {
-    synth: Tone.Synth | undefined;
+    synth: Tone.PolySynth | undefined;
+    mode: String = 'ionian';
 
-    modalScales = {
-        'dorian': ['D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5']       
-    };
-
-
-    async initAudio() 
-    {
+    async initAudio() {
         await Tone.start();
-        this.synth = new Tone.Synth().toDestination();
+        this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
         this.playSound('G6', '32n');
     }
 
-    playSound(note : Tone.Unit.Frequency, time : Tone.Unit.Time) 
-    {
+    playSound(note: Tone.Unit.Frequency, time: Tone.Unit.Time) {
         this.synth?.triggerAttackRelease(note, time);
     }
 
-    playRandomDorianNote() {
-        this.playSound(this.randomDorianNote(), '16n');
+    playRandomScaleNote() {
+        this.playSound(this.randomScaleNote(), '16n');
     }
 
-    randomDorianNote() {
-        const scale = this.modalScales.dorian;
+    randomScaleNote() {
+        const scale = modalScales[this.mode];
         const i = Math.floor(Math.random() * scale.length);
         return scale[i];
     }
@@ -48,7 +71,7 @@ class MyViewPlugin implements PluginValue {
 
     update(update: ViewUpdate) {
         // ...
-        synth.playRandomDorianNote();
+        synth.playRandomScaleNote();
     }
 
     destroy() {
