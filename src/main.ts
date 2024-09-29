@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { Plugin, Notice } from 'obsidian';
 import {
     ViewUpdate,
     PluginValue,
@@ -10,14 +10,15 @@ import * as Tone from 'tone';
 const majorScale = 'C-D-E-F-G-A-B'.split('-');
 const modes = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
 
-function buildScale(startIndex) {
+function buildScale(startIndex : number) {
     const out = [];
     let octave = 4;
     for (let i = 0; i <= majorScale.length; ++i) {
         let j = i + startIndex;
         if (j >= majorScale.length) {
             j = j - majorScale.length;
-            octave++;
+            if (j==0)
+                octave++;
         }
         out.push(majorScale[j] + octave);
     }
@@ -29,16 +30,23 @@ function buildModes() {
     modes.forEach((mode, i) => {
         out[mode] = buildScale(i);
     })
-
     return out;
+}
+
+function randomMode() {
+    const i = Math.floor(Math.random() * modes.length);
+    return modes[i];    
 }
 
 const modalScales = buildModes();
 console.log('modes', modalScales);
 
+
 class Synth {
     synth: Tone.PolySynth | undefined;
-    mode: String = 'ionian';
+    mode: String = randomMode();
+    nextIndex: number = 0;
+    direction: number = 1;
 
     async initAudio() {
         await Tone.start();
@@ -46,12 +54,33 @@ class Synth {
         this.playSound('G6', '32n');
     }
 
+    randomiseMode() {
+        this.mode = randomMode();
+        this.nextIndex = 0;
+    }
+
     playSound(note: Tone.Unit.Frequency, time: Tone.Unit.Time) {
         this.synth?.triggerAttackRelease(note, time);
     }
 
-    playRandomScaleNote() {
-        this.playSound(this.randomScaleNote(), '16n');
+    nextScaleNote() {
+        const scale = modalScales[this.mode];
+        const note = scale[this.nextIndex];
+        this.nextIndex += this.direction;
+        if (this.nextIndex >= scale.length) {
+            this.direction = -1;
+            this.nextIndex += this.direction;
+            this.nextIndex += this.direction;
+        }
+        if (this.nextIndex < 0) {
+            this.direction = 1;
+            this.nextIndex += this.direction;
+        }
+        return note;
+    }
+
+    playNextScaleNote() {
+        this.playSound(this.nextScaleNote(), '16n');
     }
 
     randomScaleNote() {
@@ -59,6 +88,11 @@ class Synth {
         const i = Math.floor(Math.random() * scale.length);
         return scale[i];
     }
+
+    playRandomScaleNote() {
+        this.playSound(this.randomScaleNote(), '16n');
+    }
+
 
 }
 
@@ -71,7 +105,7 @@ class MyViewPlugin implements PluginValue {
 
     update(update: ViewUpdate) {
         // ...
-        synth.playRandomScaleNote();
+        synth.playNextScaleNote();
     }
 
     destroy() {
@@ -86,6 +120,15 @@ export default class TimeControlPlugin extends Plugin {
     override async onload() {
         await synth.initAudio();
         this.registerEditorExtension(myViewPlugin);
+
+        this.addCommand({
+            id: 'reveal-and-rerandomise-scale-mode',
+            name: 'Reveal and re-randomise scale mode',
+            callback: () => {
+                new Notice(`Mode was ${synth.mode}`);
+                synth.randomiseMode();
+            }
+        });
         console.log("Time control loaded!");
     }
 
