@@ -8,7 +8,31 @@ import {
 import * as Tone from 'tone';
 
 const majorScale = 'C-D-E-F-G-A-B'.split('-');
+
+const majorSemiToneSequence : Array<number> = [2, 2, 1, 2, 2, 2, 1];
 const modes = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
+
+function semiToneJump(i: number, modeIndex: number = 0) {
+    const j = (i + modeIndex) % majorSemiToneSequence.length;
+    return majorSemiToneSequence[j];
+}
+
+function buildScaleFrom(startNote : string, numNotes : number, modeIndex : number = 0) {
+    const fStart = Tone.Frequency(startNote);
+    const out = [fStart];
+    for (let i = 0; i < numNotes; ++i) {
+        out.push(fStart.transpose(semiToneJump(i, modeIndex)));
+    }
+    return out;
+}
+
+function buildTranposedModes() {
+    const out: Object = {};
+    modes.forEach((mode, i) => {
+        out[mode] = buildScaleFrom('C4', 8, i);
+    })
+    return out;  
+}
 
 function buildScale(startIndex : number) {
     const out = [];
@@ -41,6 +65,8 @@ function randomMode() {
 const modalScales = buildModes();
 console.log('modes', modalScales);
 
+const transposedModalScales = buildTranposedModes();
+console.log('transposed', transposedModalScales);
 
 class Synth {
     synth: Tone.PolySynth | undefined;
