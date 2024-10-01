@@ -19,9 +19,13 @@ function semiToneJump(i: number, modeIndex: number = 0) {
 
 function buildScaleFrom(startNote : string, numNotes : number, modeIndex : number = 0) {
     const fStart = Tone.Frequency(startNote);
-    const out = [fStart];
-    for (let i = 0; i < numNotes; ++i) {
-        out.push(fStart.transpose(semiToneJump(i, modeIndex)));
+    let totalJumps = 0;
+    const out = [fStart.toNote()];
+    for (let i = 0; out.length < numNotes; ++i) {
+        const semiJump = semiToneJump(i, modeIndex);
+        totalJumps += semiJump;
+        const note = fStart.transpose(totalJumps);
+        out.push(note.toNote());
     }
     return out;
 }
@@ -90,7 +94,7 @@ class Synth {
     }
 
     nextScaleNote() {
-        const scale = modalScales[this.mode];
+        const scale = transposedModalScales[this.mode];
         const note = scale[this.nextIndex];
         this.nextIndex += this.direction;
         if (this.nextIndex >= scale.length) {
@@ -110,7 +114,7 @@ class Synth {
     }
 
     randomScaleNote() {
-        const scale = modalScales[this.mode];
+        const scale = transposedModalScales[this.mode];
         const i = Math.floor(Math.random() * scale.length);
         return scale[i];
     }
