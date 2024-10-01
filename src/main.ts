@@ -135,7 +135,9 @@ class MyViewPlugin implements PluginValue {
 
     update(update: ViewUpdate) {
         // ...
-        synth.playNextScaleNote();
+        if (update.docChanged) {
+            synth.playNextScaleNote();
+        }
     }
 
     destroy() {
