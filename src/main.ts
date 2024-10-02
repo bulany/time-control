@@ -12,6 +12,27 @@ const majorScale = 'C-D-E-F-G-A-B'.split('-');
 const majorSemiToneSequence : Array<number> = [2, 2, 1, 2, 2, 2, 1];
 const modes = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
 
+function transcriptionToSemiToneSequence(transcription: string) {
+    const output : Array<number> = [];
+    
+    return output;
+}
+
+class Song {
+    name: string;
+    transcription: string;
+    semiToneSequence: Array<number>;
+
+    constructor(name: string, transcription: string) {
+        this.name = name;
+        this.transcription = transcription;
+        this.semiToneSequence = transcriptionToSemiToneSequence(this.transcription);
+    }
+}
+
+const happyBirthday = new Song('Happy Birthday', 'Sol.Sol-^La..-vSol..^Do..-vSi..-...');
+console.log('hb', happyBirthday);
+
 function semiToneJump(i: number, modeIndex: number = 0) {
     const j = (i + modeIndex) % majorSemiToneSequence.length;
     return majorSemiToneSequence[j];
