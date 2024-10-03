@@ -1,24 +1,8 @@
-.tz-suggester-container {
-  display: flex;
-  place-content: space-between;
-}
+/*
 
-.tz-key-shortcode {
-  margin-right: 8px;
-}
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
 
-.tz-settings-disabled {
-  opacity: 0.5;
-}
+If your plugin does not need CSS, delete this file.
 
-.tz-highlight1 {
-  color: hsl(42, 70%, 65%);
-}
-
-.tz-highlight2 {
-  color: hsl(42, 55%, 55%)
-}
-
-.tz-highlight3 {
-  color: hsl(42, 55%, 45%)
-}
+*/

@@ -15,3 +15,7 @@ Try to make an Obsidian plugin instead.
 Going to try to make this a fork of https://github.com/ferenk/obsidian-tokenz
 Aiming to just add some musical sound to smileys
 Keep just the README and the CHANGELOG
+
+## [0.0.3] - 2024-10-03
+
+Its not a fork any more of https://github.com/ferenk/obsidian-tokenz - going back to basics and just making a view plugin by following the tutorial.

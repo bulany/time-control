@@ -1,10 +1,10 @@
 {
 	"id": "time-control",
 	"name": "Time Control",
-	"version": "0.74",
+	"version": "0.0.2",
 	"minAppVersion": "1.6.6",
-	"description": "Musical smileys",
-	"author": "Ferenc Moricz, bulany",
-	"authorUrl": "https://github.com/ferenk",
+	"description": "Taking more control of time",
+	"author": "bulany",
+	"authorUrl": "https://github.com/bulany",
 	"isDesktopOnly": false
 }
