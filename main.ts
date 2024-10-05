@@ -1,10 +1,22 @@
 import { Plugin, Notice } from 'obsidian';
+
+import { syntaxTree } from "@codemirror/language";
+
+import {
+	RangeSetBuilder,
+} from "@codemirror/state";
+
 import {
 	ViewUpdate,
+	PluginSpec,
 	PluginValue,
 	EditorView,
 	ViewPlugin,
+	Decoration,
+	DecorationSet,
+	WidgetType
 } from "@codemirror/view";
+
 import * as Tone from 'tone';
 
 const majorScale = 'C-D-E-F-G-A-B'.split('-');
@@ -150,13 +162,25 @@ class Synth {
 
 const synth = new Synth();
 
+class EmojiWidget extends WidgetType {
+  toDOM(view: EditorView): HTMLElement {
+    const div = document.createElement("span");
+
+    div.innerText = "👉";
+
+    return div;
+  }
+}
+
 class MyViewPlugin implements PluginValue {
+
+	decorations: DecorationSet;
+
 	constructor(view: EditorView) {
-		// ...
+		this.decorations = this.buildDecorations(view);
 	}
 
 	update(update: ViewUpdate) {
-		// ...
 		console.log('update', update);
 		if (update.focusChanged) {
 			console.log('focusChanged');
@@ -165,23 +189,31 @@ class MyViewPlugin implements PluginValue {
 		if (update.docChanged) {
 			console.log('docChanged');
 			synth.playNextScaleNote();
-			for (const tr of update.transactions) {
-				if (!tr.isUserEvent('input.type')) continue;
-				tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-					console.log('change', fromA, toA, fromB, toB, inserted.toString());
-				})
-
-			}
+			this.decorations = this.buildDecorations(update.view);
 		}
 	}
 
 	destroy() {
-		// ...
 	}
 
+	buildDecorations(view: EditorView): DecorationSet {
+		const builder = new RangeSetBuilder<Decoration>();
+		for (let {from, to} of view.visibleRanges) {
+			syntaxTree(view.state).iterate({from, to, enter(node) {
+				
+				console.log('node', node.type.name, node.from, node.to, node.type.is('link'));
+			}});
+		}
+		return builder.finish();
+
+	}
 }
 
-const myViewPlugin = ViewPlugin.fromClass(MyViewPlugin);
+const myViewPluginSpec: PluginSpec<MyViewPlugin> = {
+  decorations: (value: MyViewPlugin) => value.decorations
+};
+
+const myViewPlugin = ViewPlugin.fromClass(MyViewPlugin, myViewPluginSpec);
 
 export default class TimeControlPlugin extends Plugin {
 
