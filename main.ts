@@ -162,14 +162,21 @@ class Synth {
 
 const synth = new Synth();
 
-class EmojiWidget extends WidgetType {
-  toDOM(view: EditorView): HTMLElement {
-    const div = document.createElement("span");
+class TimerWidget extends WidgetType {
 
-    div.innerText = "👉";
+	minutes: number = -1;
 
-    return div;
-  }
+	constructor(minutes: number) {
+		super();
+		this.minutes = minutes;
+	}
+
+	toDOM(view: EditorView): HTMLElement {
+		const div = document.createElement("span");
+
+		div.innerText = `⏰ ${this.minutes} minutes`;
+		return div;
+	}
 }
 
 class MyViewPlugin implements PluginValue {
@@ -181,13 +188,10 @@ class MyViewPlugin implements PluginValue {
 	}
 
 	update(update: ViewUpdate) {
-		console.log('update', update);
 		if (update.focusChanged) {
-			console.log('focusChanged');
 			synth.playSound('C3', '8n');
 		}
 		if (update.docChanged) {
-			console.log('docChanged');
 			synth.playNextScaleNote();
 			this.decorations = this.buildDecorations(update.view);
 		}
@@ -198,19 +202,38 @@ class MyViewPlugin implements PluginValue {
 
 	buildDecorations(view: EditorView): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
-		for (let {from, to} of view.visibleRanges) {
-			syntaxTree(view.state).iterate({from, to, enter(node) {
-				
-				console.log('node', node.type.name, node.from, node.to, node.type.is('link'));
-			}});
+		const that = this;
+		for (let { from, to } of view.visibleRanges) {
+			syntaxTree(view.state).iterate({
+				from, to, enter(node) {
+
+					if (that.nodeTypeIs(node.type.name, 'link') && !that.nodeTypeIs(node.type.name, 'formatting')) {
+						const text = view.state.doc.sliceString(node.from, node.to);
+						const match = /^timer:\s*(\d+)m$/.exec(text);
+						if (match) {
+							console.log('node', node.from, node.to, node.type.name, text);
+							const minutes = parseInt(match[1]);
+							builder.add(node.from, node.to, Decoration.replace({widget: new TimerWidget(minutes)}))
+						}
+						
+					}
+
+				}
+			});
 		}
 		return builder.finish();
 
 	}
+
+	nodeTypeIs(name: string, type: string): boolean {
+		const types = name.split('_')
+		const found = types.find(val => val == type)
+		return found != undefined
+	}
 }
 
 const myViewPluginSpec: PluginSpec<MyViewPlugin> = {
-  decorations: (value: MyViewPlugin) => value.decorations
+	decorations: (value: MyViewPlugin) => value.decorations
 };
 
 const myViewPlugin = ViewPlugin.fromClass(MyViewPlugin, myViewPluginSpec);
