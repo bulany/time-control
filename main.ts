@@ -213,9 +213,9 @@ class MyViewPlugin implements PluginValue {
 						if (match) {
 							console.log('node', node.from, node.to, node.type.name, text);
 							const minutes = parseInt(match[1]);
-							builder.add(node.from, node.to, Decoration.replace({widget: new TimerWidget(minutes)}))
+							builder.add(node.from, node.to, Decoration.replace({ widget: new TimerWidget(minutes) }))
 						}
-						
+
 					}
 
 				}
@@ -238,11 +238,44 @@ const myViewPluginSpec: PluginSpec<MyViewPlugin> = {
 
 const myViewPlugin = ViewPlugin.fromClass(MyViewPlugin, myViewPluginSpec);
 
+class TimerDecorationBuilder {
+	decorations : DecorationSet;
+
+	constructor(view : EditorView) {
+		this.decorations = Decoration.set([]);
+		console.log('builder construct');
+	}
+
+	update(update : ViewUpdate) {
+		console.log('builder update');
+		return this.decorations;
+	}
+}
+
 export default class TimeControlPlugin extends Plugin {
 
 	override async onload() {
 		await synth.initAudio();
 		this.registerEditorExtension(myViewPlugin);
+
+		this.registerEditorExtension(
+			ViewPlugin.fromClass(
+				class implements PluginValue {
+					decorations: DecorationSet;
+					builder: TimerDecorationBuilder;
+
+					constructor(view: EditorView) {
+						this.builder = new TimerDecorationBuilder(view);
+						this.decorations = this.builder.decorations;
+					}
+
+					update(update: ViewUpdate) {
+						this.decorations = this.builder.update(update);
+					}
+				},
+				{ decorations: v => v.decorations }
+			)
+		);
 
 		this.addCommand({
 			id: 'reveal-and-rerandomise-scale-mode',
