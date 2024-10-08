@@ -3,6 +3,8 @@ import { Plugin, Notice } from 'obsidian';
 import { syntaxTree } from "@codemirror/language";
 
 import {
+	Range,
+	RangeSet,
 	RangeSetBuilder,
 } from "@codemirror/state";
 
@@ -179,31 +181,50 @@ class TimerWidget extends WidgetType {
 	}
 }
 
-class MyViewPlugin implements PluginValue {
 
+class TimerPluginValue implements PluginValue {
 	decorations: DecorationSet;
+	pendingUpdate: ViewUpdate | null = null;
+	delay: number = 150; 
 
-	constructor(view: EditorView) {
-		this.decorations = this.buildDecorations(view);
+	constructor(view : EditorView) {
+		console.log('timer constructor')
+		this.decorations = this.buildDecorations(view, view.visibleRanges);
+		const d = this.decorations.iter()
+		while (d.value) {
+			console.log('deco', d.value.startSide, d.value.endSide, d.value.spec);
+			d.next()
+		}
 	}
 
 	update(update: ViewUpdate) {
 		if (update.focusChanged) {
 			synth.playSound('C3', '8n');
 		}
-		if (update.docChanged) {
-			synth.playNextScaleNote();
-			this.decorations = this.buildDecorations(update.view);
-		}
+		if (!update.docChanged)
+			return this.decorations;
+
+
+		synth.playNextScaleNote();
+		const changedRanges : {from: number, to: number}[] = [];
+		update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+			changedRanges.push({from: fromA, to: toA});
+			changedRanges.push({from: fromB, to: toB});
+			console.log('change', fromA, toA, fromB, toB, inserted);
+		});
+		this.decorations = this.buildDecorations(update.view, changedRanges);
+	
+		return this.decorations;
 	}
 
 	destroy() {
+		console.log('destroy called');
 	}
 
-	buildDecorations(view: EditorView): DecorationSet {
+	buildDecorations(view: EditorView, ranges : typeof view.visibleRanges ): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
 		const that = this;
-		for (let { from, to } of view.visibleRanges) {
+		for (let { from, to } of ranges) {
 			syntaxTree(view.state).iterate({
 				from, to, enter(node) {
 
@@ -232,49 +253,12 @@ class MyViewPlugin implements PluginValue {
 	}
 }
 
-const myViewPluginSpec: PluginSpec<MyViewPlugin> = {
-	decorations: (value: MyViewPlugin) => value.decorations
-};
-
-const myViewPlugin = ViewPlugin.fromClass(MyViewPlugin, myViewPluginSpec);
-
-class TimerDecorationBuilder {
-	decorations : DecorationSet;
-
-	constructor(view : EditorView) {
-		this.decorations = Decoration.set([]);
-		console.log('builder construct');
-	}
-
-	update(update : ViewUpdate) {
-		console.log('builder update');
-		return this.decorations;
-	}
-}
-
 export default class TimeControlPlugin extends Plugin {
 
 	override async onload() {
 		await synth.initAudio();
-		this.registerEditorExtension(myViewPlugin);
-
 		this.registerEditorExtension(
-			ViewPlugin.fromClass(
-				class implements PluginValue {
-					decorations: DecorationSet;
-					builder: TimerDecorationBuilder;
-
-					constructor(view: EditorView) {
-						this.builder = new TimerDecorationBuilder(view);
-						this.decorations = this.builder.decorations;
-					}
-
-					update(update: ViewUpdate) {
-						this.decorations = this.builder.update(update);
-					}
-				},
-				{ decorations: v => v.decorations }
-			)
+			ViewPlugin.fromClass(TimerPluginValue, { decorations: v => v.decorations } )
 		);
 
 		this.addCommand({
