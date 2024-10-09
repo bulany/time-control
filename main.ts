@@ -164,21 +164,41 @@ class Synth {
 
 const synth = new Synth();
 
+let next_timer_id = 0;
+
 class TimerWidget extends WidgetType {
 
+	id: number = -1;
 	minutes: number = -1;
 
 	constructor(minutes: number) {
 		super();
+		this.id = next_timer_id++;
 		this.minutes = minutes;
 	}
 
 	toDOM(view: EditorView): HTMLElement {
-		const div = document.createElement("span");
-
-		div.innerText = `⏰ ${this.minutes} minutes`;
-		return div;
+		const span = document.createElement("span");
+		span.innerText = `⏰ ${this.minutes} minutes`;
+		return span;
 	}
+}
+
+
+function createTimerDecorationRanges(text: string, offset: number = 0) {
+	const regex = /^\[timer:\s*(\d+)m\]$/g;
+	let match;
+	let ranges = [];
+	while (match = regex.exec(text)) {
+		const from = offset + match.index;
+		const to = offset + match.index + match[0].length;
+		const minutes = parseInt(match[1]);
+		const decoration = Decoration.replace({widget: new TimerWidget(minutes)});
+		const range = decoration.range(from, to);
+		ranges.push(range);
+		console.log('found timer', from, to);
+	}
+	return ranges;
 }
 
 
@@ -188,13 +208,9 @@ class TimerPluginValue implements PluginValue {
 	delay: number = 150; 
 
 	constructor(view : EditorView) {
-		console.log('timer constructor')
-		this.decorations = this.buildDecorations(view, view.visibleRanges);
-		const d = this.decorations.iter()
-		while (d.value) {
-			console.log('deco', d.value.startSide, d.value.endSide, d.value.spec);
-			d.next()
-		}
+		console.log('plugin constructor')
+		this.decorations = new RangeSetBuilder<Decoration>().finish();
+		this.decorations.update({add: createTimerDecorationRanges(view.state.doc.toString())});
 	}
 
 	update(update: ViewUpdate) {
@@ -206,6 +222,8 @@ class TimerPluginValue implements PluginValue {
 
 
 		synth.playNextScaleNote();
+		this.decorations = this.decorations.map(update.changes);
+
 		const changedRanges : {from: number, to: number}[] = [];
 		update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
 			changedRanges.push({from: fromA, to: toA});
