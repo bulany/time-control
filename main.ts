@@ -1,6 +1,12 @@
 import { Plugin, Notice } from 'obsidian';
 
 import { syntaxTree } from "@codemirror/language";
+import { markdown } from "@codemirror/lang-markdown"
+
+import { parser as markdownParser } from "@lezer/markdown"
+
+import { SyntaxTreeDebugger } from 'syntax-tree-debugger';
+
 
 import {
 	Range,
@@ -164,6 +170,9 @@ class Synth {
 
 const synth = new Synth();
 
+
+//const extendedMarkdown = markdown({extensions:})
+
 let next_timer_id = 0;
 
 class TimerWidget extends WidgetType {
@@ -241,9 +250,10 @@ class TimerPluginValue implements PluginValue {
 
 	buildDecorations(view: EditorView, ranges : typeof view.visibleRanges ): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
+		const tree = syntaxTree(view.state);
 		const that = this;
 		for (let { from, to } of ranges) {
-			syntaxTree(view.state).iterate({
+			tree.iterate({
 				from, to, enter(node) {
 
 					if (that.nodeTypeIs(node.type.name, 'link') && !that.nodeTypeIs(node.type.name, 'formatting')) {
@@ -286,6 +296,20 @@ export default class TimeControlPlugin extends Plugin {
 				new Notice(`Mode was ${synth.mode}`);
 				synth.randomiseMode();
 			}
+		});
+
+		this.addCommand({
+			id: 'test',
+			name: 'hi',
+			editorCallback(editor, ctx) {
+				const cmEditor = (ctx.editor as any).cm as EditorView;
+				if (cmEditor) {
+					console.log('hi')
+					const tree = syntaxTree(cmEditor.state);
+					console.log(tree.toString());
+					SyntaxTreeDebugger.printTreeAscii(cmEditor);
+				}
+			}, 
 		});
 		console.log("Time control loaded!");
 	}
