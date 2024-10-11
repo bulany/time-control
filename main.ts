@@ -1,11 +1,9 @@
-import { Plugin, Notice } from 'obsidian';
+import { Plugin, Notice, MarkdownView } from 'obsidian';
 
 import { syntaxTree } from "@codemirror/language";
-import { markdown } from "@codemirror/lang-markdown"
-
-import { parser as markdownParser } from "@lezer/markdown"
 
 import { SyntaxTreeDebugger } from 'syntax-tree-debugger';
+import { ParseDebugger } from './parse-debugger';
 
 
 import {
@@ -123,7 +121,7 @@ class Synth {
 	async initAudio() {
 		await Tone.start();
 		this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
-		this.playSound('G6', '32n');
+		this.playSound('C5', '32n');
 	}
 
 	randomiseMode() {
@@ -283,8 +281,18 @@ class TimerPluginValue implements PluginValue {
 
 export default class TimeControlPlugin extends Plugin {
 
+	uninstallDebugger: (() => void) | null = null;
+
 	override async onload() {
 		await synth.initAudio();
+
+		Tone.getTransport().bpm.value = 60;
+		Tone.getTransport().scheduleRepeat((time) => { 
+			console.log('hi');
+			synth.synth?.triggerAttackRelease("C7", "16n", time);
+		}, "4n", Tone.now(), 10);
+		Tone.getTransport().start();
+
 		this.registerEditorExtension(
 			ViewPlugin.fromClass(TimerPluginValue, { decorations: v => v.decorations } )
 		);
@@ -299,8 +307,8 @@ export default class TimeControlPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'test',
-			name: 'hi',
+			id: 'console-log-syntax-tree',
+			name: 'Console log syntax tree',
 			editorCallback(editor, ctx) {
 				const cmEditor = (ctx.editor as any).cm as EditorView;
 				if (cmEditor) {
@@ -308,13 +316,52 @@ export default class TimeControlPlugin extends Plugin {
 					const tree = syntaxTree(cmEditor.state);
 					console.log(tree.toString());
 					SyntaxTreeDebugger.printTreeAscii(cmEditor);
+					console.log(tree);
 				}
 			}, 
 		});
+
+
+		this.addCommand({
+			id: 'toggle-parse-debug',
+			name: 'Toggle Parse Debugging',
+			callback: () => {
+					const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+					if (!view) return;
+					
+					const editorView = (view.editor as any).cm as EditorView;
+					if (!editorView) return;
+
+					if (this.uninstallDebugger) {
+							this.uninstallDebugger();
+							this.uninstallDebugger = null;
+							console.log('Parse debugging disabled');
+					} else {
+							this.uninstallDebugger = ParseDebugger.installParseLogger(editorView);
+							console.log('Parse debugging enabled');
+					}
+			}
+	});
+
+	// Command to show current parse info
+	this.addCommand({
+			id: 'show-parse-info',
+			name: 'Show Parse Info',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+					const editorView = (editor as any).cm as EditorView;
+					if (editorView) {
+							ParseDebugger.debugParseInfo(editorView);
+					}
+			}
+	});
+
 		console.log("Time control loaded!");
 	}
 
 	override onunload(): void {
+		if (this.uninstallDebugger) {
+			this.uninstallDebugger();
+	}
 		console.log('Time control unloaded!');
 	}
 
