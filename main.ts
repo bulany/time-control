@@ -298,6 +298,12 @@ export default class TimeControlPlugin extends Plugin {
 		);
 
 		this.addCommand({
+			id: 'create-timer',
+			name: 'Create Timer',
+			callback: () => this.createTimer()
+		});
+
+		this.addCommand({
 			id: 'reveal-and-rerandomise-scale-mode',
 			name: 'Reveal and re-randomise scale mode',
 			callback: () => {
@@ -363,6 +369,19 @@ export default class TimeControlPlugin extends Plugin {
 			this.uninstallDebugger();
 	}
 		console.log('Time control unloaded!');
+	}
+
+	createTimer() {
+		console.log('create timer');
+		const regex = /^\[timer:\s*(\d+)m\]$/;
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!view) return;
+
+    const editor = view.editor;
+    const cursor = editor.getCursor();
+    const line = editor.getLine(cursor.line);
+		console.log(line)
+
 	}
 
 }
