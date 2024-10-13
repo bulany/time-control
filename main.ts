@@ -5,6 +5,7 @@ import { syntaxTree } from "@codemirror/language";
 import { SyntaxTreeDebugger } from 'syntax-tree-debugger';
 import { ParseDebugger } from './parse-debugger';
 
+import * as net from 'net'
 
 import {
 	Range,
@@ -200,7 +201,7 @@ function createTimerDecorationRanges(text: string, offset: number = 0) {
 		const from = offset + match.index;
 		const to = offset + match.index + match[0].length;
 		const minutes = parseInt(match[1]);
-		const decoration = Decoration.replace({widget: new TimerWidget(minutes)});
+		const decoration = Decoration.replace({ widget: new TimerWidget(minutes) });
 		const range = decoration.range(from, to);
 		ranges.push(range);
 		console.log('found timer', from, to);
@@ -212,12 +213,12 @@ function createTimerDecorationRanges(text: string, offset: number = 0) {
 class TimerPluginValue implements PluginValue {
 	decorations: DecorationSet;
 	pendingUpdate: ViewUpdate | null = null;
-	delay: number = 150; 
+	delay: number = 150;
 
-	constructor(view : EditorView) {
+	constructor(view: EditorView) {
 		console.log('plugin constructor')
 		this.decorations = new RangeSetBuilder<Decoration>().finish();
-		this.decorations.update({add: createTimerDecorationRanges(view.state.doc.toString())});
+		this.decorations.update({ add: createTimerDecorationRanges(view.state.doc.toString()) });
 	}
 
 	update(update: ViewUpdate) {
@@ -231,14 +232,14 @@ class TimerPluginValue implements PluginValue {
 		synth.playNextScaleNote();
 		this.decorations = this.decorations.map(update.changes);
 
-		const changedRanges : {from: number, to: number}[] = [];
+		const changedRanges: { from: number, to: number }[] = [];
 		update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-			changedRanges.push({from: fromA, to: toA});
-			changedRanges.push({from: fromB, to: toB});
+			changedRanges.push({ from: fromA, to: toA });
+			changedRanges.push({ from: fromB, to: toB });
 			console.log('change', fromA, toA, fromB, toB, inserted);
 		});
 		this.decorations = this.buildDecorations(update.view, changedRanges);
-	
+
 		return this.decorations;
 	}
 
@@ -246,7 +247,7 @@ class TimerPluginValue implements PluginValue {
 		console.log('destroy called');
 	}
 
-	buildDecorations(view: EditorView, ranges : typeof view.visibleRanges ): DecorationSet {
+	buildDecorations(view: EditorView, ranges: typeof view.visibleRanges): DecorationSet {
 		const builder = new RangeSetBuilder<Decoration>();
 		const tree = syntaxTree(view.state);
 		const that = this;
@@ -281,20 +282,24 @@ class TimerPluginValue implements PluginValue {
 
 export default class TimeControlPlugin extends Plugin {
 
+	socket: net.Socket | null = null;
+
 	uninstallDebugger: (() => void) | null = null;
 
 	override async onload() {
+		this.socket = new net.Socket();
+		this.socket.connect('/tmp/mpvsocket');
 		await synth.initAudio();
 
 		Tone.getTransport().bpm.value = 60;
-		Tone.getTransport().scheduleRepeat((time) => { 
+		Tone.getTransport().scheduleRepeat((time) => {
 			console.log('hi');
 			synth.synth?.triggerAttackRelease("C7", "16n", time);
 		}, "4n", Tone.now(), 10);
 		Tone.getTransport().start();
 
 		this.registerEditorExtension(
-			ViewPlugin.fromClass(TimerPluginValue, { decorations: v => v.decorations } )
+			ViewPlugin.fromClass(TimerPluginValue, { decorations: v => v.decorations })
 		);
 
 		this.addCommand({
@@ -324,7 +329,7 @@ export default class TimeControlPlugin extends Plugin {
 					SyntaxTreeDebugger.printTreeAscii(cmEditor);
 					console.log(tree);
 				}
-			}, 
+			},
 		});
 
 
@@ -332,34 +337,40 @@ export default class TimeControlPlugin extends Plugin {
 			id: 'toggle-parse-debug',
 			name: 'Toggle Parse Debugging',
 			callback: () => {
-					const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-					if (!view) return;
-					
-					const editorView = (view.editor as any).cm as EditorView;
-					if (!editorView) return;
+				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (!view) return;
 
-					if (this.uninstallDebugger) {
-							this.uninstallDebugger();
-							this.uninstallDebugger = null;
-							console.log('Parse debugging disabled');
-					} else {
-							this.uninstallDebugger = ParseDebugger.installParseLogger(editorView);
-							console.log('Parse debugging enabled');
-					}
+				const editorView = (view.editor as any).cm as EditorView;
+				if (!editorView) return;
+
+				if (this.uninstallDebugger) {
+					this.uninstallDebugger();
+					this.uninstallDebugger = null;
+					console.log('Parse debugging disabled');
+				} else {
+					this.uninstallDebugger = ParseDebugger.installParseLogger(editorView);
+					console.log('Parse debugging enabled');
+				}
 			}
-	});
+		});
 
-	// Command to show current parse info
-	this.addCommand({
+		// Command to show current parse info
+		this.addCommand({
 			id: 'show-parse-info',
 			name: 'Show Parse Info',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-					const editorView = (editor as any).cm as EditorView;
-					if (editorView) {
-							ParseDebugger.debugParseInfo(editorView);
-					}
+				const editorView = (editor as any).cm as EditorView;
+				if (editorView) {
+					ParseDebugger.debugParseInfo(editorView);
+				}
 			}
-	});
+		});
+
+		this.addCommand({
+      id: 'mpv-play-pause',
+      name: 'Play/Pause',
+      callback: () => this.sendCommand('cycle', 'pause'),
+    });
 
 		console.log("Time control loaded!");
 	}
@@ -367,7 +378,7 @@ export default class TimeControlPlugin extends Plugin {
 	override onunload(): void {
 		if (this.uninstallDebugger) {
 			this.uninstallDebugger();
-	}
+		}
 		console.log('Time control unloaded!');
 	}
 
@@ -375,14 +386,19 @@ export default class TimeControlPlugin extends Plugin {
 		console.log('create timer');
 		const regex = /^\[timer:\s*(\d+)m\]$/;
 		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!view) return;
+		if (!view) return;
 
-    const editor = view.editor;
-    const cursor = editor.getCursor();
-    const line = editor.getLine(cursor.line);
+		const editor = view.editor;
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
 		console.log(line)
 
 	}
+
+	sendCommand(command: string, ...args: any[]) {
+    const cmd = JSON.stringify({ command: [command, ...args] });
+    this.socket?.write(cmd + '\n');
+  }
 
 }
 
