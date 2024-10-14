@@ -236,7 +236,7 @@ class TimerPluginValue implements PluginValue {
 		update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
 			changedRanges.push({ from: fromA, to: toA });
 			changedRanges.push({ from: fromB, to: toB });
-			console.log('change', fromA, toA, fromB, toB, inserted);
+			//console.log('change', fromA, toA, fromB, toB, inserted);
 		});
 		this.decorations = this.buildDecorations(update.view, changedRanges);
 
@@ -283,6 +283,10 @@ class TimerPluginValue implements PluginValue {
 export default class TimeControlPlugin extends Plugin {
 
 	socket: net.Socket | null = null;
+	loopStart: number | null = null;
+	loopEnd: number | null = null;
+	isPlaying: boolean = false;
+	isLooping: boolean = false;
 
 	uninstallDebugger: (() => void) | null = null;
 
@@ -369,8 +373,21 @@ export default class TimeControlPlugin extends Plugin {
 		this.addCommand({
       id: 'mpv-play-pause',
       name: 'Play/Pause',
-      callback: () => this.sendCommand('cycle', 'pause'),
+      callback: () => this.sendCommand('cycle', 'pause')
     });
+
+
+		this.addCommand({
+			id: 'mpv-start-loop',
+			name: 'Start Loop',
+			callback: () => this.startLoop()
+		});
+
+		this.addCommand({
+			id: 'mpv-stop-loop',
+			name: 'Stop Loop',
+			callback: () => this.stopLoop()
+		});
 
 		console.log("Time control loaded!");
 	}
@@ -398,6 +415,44 @@ export default class TimeControlPlugin extends Plugin {
 	sendCommand(command: string, ...args: any[]) {
     const cmd = JSON.stringify({ command: [command, ...args] });
     this.socket?.write(cmd + '\n');
+  }
+
+	async startLoop() {
+    this.loopStart = await this.getPropertyValue('time-pos');
+    new Notice(`Loop start set to ${this.loopStart?.toFixed(2)} seconds`);
+		if (!this.loopStart || !this.loopEnd || this.loopStart > this.loopEnd) {
+			return;
+		}
+		this.sendCommand('set_property', 'ab-loop-a', this.loopStart);
+    this.sendCommand('set_property', 'ab-loop-b', this.loopEnd);
+    this.sendCommand('seek', this.loopStart, 'absolute');
+    this.sendCommand('set_property', 'loop-file', 'inf');
+		this.isLooping = true;
+
+	}
+
+	async stopLoop() {
+    this.loopEnd = await this.getPropertyValue('time-pos');
+    new Notice(`Loop end set to ${this.loopEnd.toFixed(2)} seconds`);
+		if (!this.loopStart || !this.loopEnd || this.loopStart > this.loopEnd) {
+			return;
+		}
+		this.sendCommand('set_property', 'ab-loop-a', this.loopStart);
+    this.sendCommand('set_property', 'ab-loop-b', this.loopEnd);
+    this.sendCommand('set_property', 'loop-file', 'inf');
+
+    // Ensure we start from the beginning of the loop
+    this.sendCommand('seek', this.loopStart, 'absolute');
+	}
+
+	async getPropertyValue(property: string): Promise<number> {
+    return new Promise((resolve) => {
+      this.sendCommand('get_property', property);
+      this.socket.once('data', (data) => {
+        const response = JSON.parse(data.toString());
+        resolve(response.data);
+      });
+    });
   }
 
 }
