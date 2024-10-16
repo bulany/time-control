@@ -6,7 +6,7 @@ import { SyntaxTreeDebugger } from 'syntax-tree-debugger';
 import { ParseDebugger } from './parse-debugger';
 
 import { MpvPlugin } from './mpv-plugin';
-
+import { SickDiaryPlugin } from './sick-diary-plugin';
 
 
 import {
@@ -283,6 +283,7 @@ class TimerPluginValue implements PluginValue {
 }
 
 const mpvPlugin = new MpvPlugin();
+const sickDiaryPlugin = new SickDiaryPlugin();
 
 export default class TimeControlPlugin extends Plugin {
 
@@ -292,6 +293,7 @@ export default class TimeControlPlugin extends Plugin {
 
 	override async onload() {
 		await mpvPlugin.onload(this);
+		await sickDiaryPlugin.onload(this);
 		await synth.initAudio();
 
 		Tone.getTransport().bpm.value = 60;
@@ -374,6 +376,7 @@ export default class TimeControlPlugin extends Plugin {
 
 	override async onunload() {
 		await mpvPlugin.onunload();
+		await sickDiaryPlugin.onunload();
 		if (this.uninstallDebugger) {
 			this.uninstallDebugger();
 		}
