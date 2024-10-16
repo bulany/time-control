@@ -18,6 +18,10 @@ export class SickDiaryPlugin {
     el: HTMLElement, 
     ctx: MarkdownPostProcessorContext)
   {
-    console.log('process', el);
+    const pre = el.createEl('pre');
+    const code = pre.createEl('code');
+    code.textContent = source;
+    console.log('process1', source);
+
   }
 }
