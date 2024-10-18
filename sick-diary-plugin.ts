@@ -37,6 +37,9 @@ function validateSickValue(obj:any) {
   return output;
 }
 
+const things : Array<any> = [];
+let id : number = 0;
+
 export class SickDiaryPlugin {
   plugin : Plugin | null = null;
   values : Array<SickValue> = [];
@@ -62,7 +65,17 @@ export class SickDiaryPlugin {
     const obj = parseSimpleYaml(source);
     const val = validateSickValue(obj);
     if (val) {
-      console.log('we have a value', val);
+      
+      const i = things.findIndex(obj => obj.el == el);
+      if (i < 0) {
+        things.push({id, el, val})
+        console.log('new value', id);
+        id++;
+      }
+      else {
+        console.log('found old value', things[i].id)
+      }
+      
     }
 
   }
