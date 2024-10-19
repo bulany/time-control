@@ -1,10 +1,26 @@
 
-import { Plugin, Notice, MarkdownPostProcessorContext } from 'obsidian';
+import {
+  Plugin,
+  Notice,
+  MarkdownPostProcessorContext,
+  moment
+} from 'obsidian';
 
+function calculateDaysBetween(date1, date2) {
+  // Parse the dates using Moment.js
+  // The format string 'DD/MM/YYYY' matches your input format
+  const momentDate1 = moment(date1, 'DD/MM/YYYY');
+  const momentDate2 = moment(date2, 'DD/MM/YYYY');
 
-function parseSimpleYaml(input : string) {
+  // Calculate the difference in days
+  const days = momentDate2.diff(momentDate1, 'days');
+
+  return Math.abs(days); // Return absolute value to handle date2 < date1
+}
+
+function parseSimpleYaml(input: string) {
   const lines = input.split('\n');
-  const output : any = {};
+  const output: any = {};
   lines.forEach(line => {
     const [key, value] = line.split(': ');
     if (key && value)
@@ -18,11 +34,15 @@ class SickValue {
   end: string = ''
   sickness: number = 0
   summary: string = ''
+
+  days() {
+    return calculateDaysBetween(this.start, this.end);
+  }
 }
 
-function validateSickValue(obj:any) {
+function validateSickValue(obj: any) {
 
-  const outObj : any = {};
+  const outObj: any = {};
   if (!obj.start)
     return null
   outObj.start = obj.start;
@@ -37,27 +57,26 @@ function validateSickValue(obj:any) {
   return output;
 }
 
-const things : Array<any> = [];
-let id : number = 0;
+const things: Array<any> = [];
+let id: number = 0;
 
 export class SickDiaryPlugin {
-  plugin : Plugin | null = null;
-  values : Array<SickValue> = [];
+  plugin: Plugin | null = null;
+  values: Array<SickValue> = [];
 
-	async onload(plugin : Plugin) {
+  async onload(plugin: Plugin) {
     this.plugin = plugin;
     this.plugin.registerMarkdownCodeBlockProcessor('sick', this.processDataBlock);
-		console.log('sick diary onload');
-	}
+    console.log('sick diary onload');
+  }
 
-	async onunload() {
-		console.log('sick diary onunload');
-	}
+  async onunload() {
+    console.log('sick diary onunload');
+  }
 
-  processDataBlock(source: string, 
-    el: HTMLElement, 
-    ctx: MarkdownPostProcessorContext)
-  {
+  processDataBlock(source: string,
+    el: HTMLElement,
+    ctx: MarkdownPostProcessorContext) {
     const pre = el.createEl('pre');
     const code = pre.createEl('code');
     code.textContent = source;
@@ -65,17 +84,18 @@ export class SickDiaryPlugin {
     const obj = parseSimpleYaml(source);
     const val = validateSickValue(obj);
     if (val) {
-      
+
       const i = things.findIndex(obj => obj.el == el);
       if (i < 0) {
-        things.push({id, el, val})
-        console.log('new value', id);
+        things.push({ id, el, val })
+        console.log('new value', val);
+        console.log('days between', val.days());
         id++;
       }
       else {
         console.log('found old value', things[i].id)
       }
-      
+
     }
 
   }
