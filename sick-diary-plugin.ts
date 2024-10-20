@@ -6,7 +6,7 @@ import {
   moment
 } from 'obsidian';
 
-function calculateDaysBetween(date1, date2) {
+function calculateDaysBetween(date1 : string, date2 : string) {
   // Parse the dates using Moment.js
   // The format string 'DD/MM/YYYY' matches your input format
   const momentDate1 = moment(date1, 'DD/MM/YYYY');
@@ -38,23 +38,21 @@ class SickValue {
   days() {
     return calculateDaysBetween(this.start, this.end);
   }
-}
 
-function validateSickValue(obj: any) {
-
-  const outObj: any = {};
-  if (!obj.start)
-    return null
-  outObj.start = obj.start;
-  if (!obj.end)
-    return null
-  outObj.end = obj.end;
-  if (!obj.sickness)
-    return null
-  outObj.sickness = obj.sickness;
-  outObj.summary = obj.summary ? obj.summary : ''
-  const output = outObj as SickValue;
-  return output;
+  static fromObject(obj : any) {
+    const outObj = new SickValue();
+    if (!obj.start)
+      return null
+    outObj.start = obj.start;
+    if (!obj.end)
+      return null
+    outObj.end = obj.end;
+    if (!obj.sickness)
+      return null
+    outObj.sickness = obj.sickness;
+    outObj.summary = obj.summary ? obj.summary : ''
+    return outObj;    
+  }
 }
 
 const things: Array<any> = [];
@@ -82,10 +80,10 @@ export class SickDiaryPlugin {
     code.textContent = source;
     console.log('process1', source);
     const obj = parseSimpleYaml(source);
-    const val = validateSickValue(obj);
+    const val = SickValue.fromObject(obj);
     if (val) {
 
-      const i = things.findIndex(obj => obj.el == el);
+      const i = things.findIndex(v => v.el == el);
       if (i < 0) {
         things.push({ id, el, val })
         console.log('new value', val);
