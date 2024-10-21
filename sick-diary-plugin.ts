@@ -1,21 +1,18 @@
-
 import {
   Plugin,
   Notice,
-  MarkdownPostProcessorContext,
-  moment
+  MarkdownPostProcessorContext
 } from 'obsidian';
 
+import moment from 'moment';
+import * as d3 from 'd3';
+
 function calculateDaysBetween(date1 : string, date2 : string) {
-  // Parse the dates using Moment.js
-  // The format string 'DD/MM/YYYY' matches your input format
-  const momentDate1 = moment(date1, 'DD/MM/YYYY');
-  const momentDate2 = moment(date2, 'DD/MM/YYYY');
-
-  // Calculate the difference in days
+  const dateFormat = 'DD/MM/YYYY';
+  const momentDate1 = moment(date1, dateFormat);
+  const momentDate2 = moment(date2, dateFormat);
   const days = momentDate2.diff(momentDate1, 'days');
-
-  return Math.abs(days); // Return absolute value to handle date2 < date1
+  return Math.abs(days); 
 }
 
 function parseSimpleYaml(input: string) {
