@@ -75,22 +75,17 @@ export class SickDiaryPlugin {
     const pre = el.createEl('pre');
     const code = pre.createEl('code');
     code.textContent = source;
-    console.log('process1', source);
     const obj = parseSimpleYaml(source);
     const val = SickValue.fromObject(obj);
     if (val) {
-
-      const i = things.findIndex(v => v.el == el);
-      if (i < 0) {
-        things.push({ id, el, val })
-        console.log('new value', val);
-        console.log('days between', val.days());
-        id++;
-      }
-      else {
-        console.log('found old value', things[i].id)
-      }
-
+      const div = el.createEl('div');
+      div.textContent = `Number of days: ${val.days()}`;
+      const svg = el.createSvg('svg');
+      const d = d3.select(svg);
+      const c = d.append('circle');
+      c.attr('r', val.days());
+      
+      
     }
 
   }
