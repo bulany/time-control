@@ -42,6 +42,7 @@ class SickValue {
   }
 
   progressSvg() {
+
     // Convert dates to day of year
     const startDayOfYear = toMoment(this.start).dayOfYear();
     const endDayOfYear = toMoment(this.end).dayOfYear();
@@ -69,8 +70,7 @@ class SickValue {
       .attr('y', margin.top)
       .attr('width', width - margin.left - margin.right)
       .attr('height', barHeight)
-      .attr('fill', '#eee')
-      .attr('rx', 4);
+      .attr('fill', '#eee');
 
     // Draw progress bar
     svg.append('rect')
@@ -78,44 +78,7 @@ class SickValue {
       .attr('y', margin.top)
       .attr('width', xScale(endDayOfYear) - xScale(startDayOfYear))
       .attr('height', barHeight)
-      .attr('fill', '#3498db')
-      .attr('rx', 4);
-
-    // Add labels
-    svg.append('text')
-      .attr('x', xScale(startDayOfYear))
-      .attr('y', margin.top - 5)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '12px')
-      .text(`Day ${startDayOfYear}`);
-
-    svg.append('text')
-      .attr('x', xScale(endDayOfYear))
-      .attr('y', margin.top - 5)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '12px')
-      .text(`Day ${endDayOfYear}`);
-
-    // Add month markers
-    const months = moment.monthsShort();
-    months.forEach((month, i) => {
-      const dayOfYear = moment().month(i).startOf('month').dayOfYear();
-
-      svg.append('line')
-        .attr('x1', xScale(dayOfYear))
-        .attr('x2', xScale(dayOfYear))
-        .attr('y1', margin.top + barHeight)
-        .attr('y2', margin.top + barHeight + 5)
-        .attr('stroke', '#666')
-        .attr('stroke-width', 1);
-
-      svg.append('text')
-        .attr('x', xScale(dayOfYear))
-        .attr('y', margin.top + barHeight + 15)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '10px')
-        .text(month);
-    });
+      .attr('fill', '#ee98db');
 
     return svg;
 
@@ -160,14 +123,23 @@ export class SickDiaryPlugin {
     el: HTMLElement,
     ctx: MarkdownPostProcessorContext) {
     const pre = el.createEl('pre');
-    const code = pre.createEl('code');
-    code.textContent = source;
     const obj = parseSimpleYaml(source);
     const val = SickValue.fromObject(obj);
     if (val) {
-      const div = el.createEl('div');
-      div.textContent = `Number of days: ${val.days()}`;
-      el.appendChild(val.progressSvg().node()!);
+      pre.appendChild(val.progressSvg().node()!);
+      pre.addEventListener('click', () => {
+        const parentCodeBlock = pre.closest('.cm-preview-code-block');
+        if (parentCodeBlock) {
+          const editButton = parentCodeBlock.querySelector('.edit-block-button');
+          if (editButton) {
+            (editButton as HTMLElement).click();
+          }
+        }
+      });
+
+    } else {
+      const code = pre.createEl('code');
+      code.textContent = source;
     }
 
   }
