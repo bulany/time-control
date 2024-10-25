@@ -32,10 +32,12 @@ function parseSimpleYaml(input: string) {
 }
 
 class SickValue {
+  id: string = ''
   start: string = ''
   end: string = ''
   sickness: number = 0
   summary: string = ''
+  seenCount: number = 0
 
   days() {
     return calculateDaysBetween(this.start, this.end);
@@ -107,40 +109,49 @@ let id: number = 0;
 
 export class SickDiaryPlugin {
   plugin: Plugin | null = null;
-  values: Array<SickValue> = [];
+  codeBlocks: Map<string, SickValue> = new Map();
 
   async onload(plugin: Plugin) {
     this.plugin = plugin;
-    this.plugin.registerMarkdownCodeBlockProcessor('sick', this.processDataBlock);
+    this.plugin.registerMarkdownCodeBlockProcessor('sick', (source: string,
+      el: HTMLElement,
+      ctx: MarkdownPostProcessorContext) => {
+      const blockId = `${ctx.sourcePath}-${ctx.getSectionInfo(el)?.lineStart}`;
+      const block = this.codeBlocks.get(blockId);
+      if (block) {
+        block.seenCount++;
+        console.log('block: ', block.id, 'seenCount: ', block.seenCount);
+
+      } else {
+        const pre = el.createEl('pre');
+        const obj = parseSimpleYaml(source);
+        const val = SickValue.fromObject(obj);
+        if (val) {
+          pre.appendChild(val.progressSvg().node()!);
+          pre.addEventListener('click', () => {
+            const parentCodeBlock = pre.closest('.cm-preview-code-block');
+            if (parentCodeBlock) {
+              const editButton = parentCodeBlock.querySelector('.edit-block-button');
+              if (editButton) {
+                (editButton as HTMLElement).click();
+              }
+            }
+          });
+          val.id = blockId;
+          this.codeBlocks.set(blockId, val);
+          console.log('added block: ', blockId);
+        } else {
+          const code = pre.createEl('code');
+          code.textContent = source;
+        }
+      }
+    });
     console.log('sick diary onload');
   }
 
   async onunload() {
+    this.codeBlocks.clear();
     console.log('sick diary onunload');
   }
 
-  processDataBlock(source: string,
-    el: HTMLElement,
-    ctx: MarkdownPostProcessorContext) {
-    const pre = el.createEl('pre');
-    const obj = parseSimpleYaml(source);
-    const val = SickValue.fromObject(obj);
-    if (val) {
-      pre.appendChild(val.progressSvg().node()!);
-      pre.addEventListener('click', () => {
-        const parentCodeBlock = pre.closest('.cm-preview-code-block');
-        if (parentCodeBlock) {
-          const editButton = parentCodeBlock.querySelector('.edit-block-button');
-          if (editButton) {
-            (editButton as HTMLElement).click();
-          }
-        }
-      });
-
-    } else {
-      const code = pre.createEl('code');
-      code.textContent = source;
-    }
-
-  }
 }
