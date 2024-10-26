@@ -1,8 +1,12 @@
 import {
   Plugin,
   Notice,
-  MarkdownPostProcessorContext
+  MarkdownPostProcessorContext,
+  MarkdownView
 } from 'obsidian';
+
+import { syntaxTree } from "@codemirror/language";
+import { EditorView } from "@codemirror/view";
 
 import moment from 'moment';
 import * as d3 from 'd3';
@@ -146,7 +150,21 @@ export class SickDiaryPlugin {
         }
       }
     });
+
+    this.scanCurrentFile();
     console.log('sick diary onload');
+  }
+
+  async scanCurrentFile() {
+    const view = this.plugin?.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!view) return;
+
+    const editorView = (view.editor as any).cm as EditorView;
+    if (!editorView) return;
+
+    const tree = syntaxTree(editorView.state);
+    console.log('syntax tree has ', tree.children.length, 'children');
+    //tree.iterate()
   }
 
   async onunload() {
