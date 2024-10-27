@@ -152,10 +152,10 @@ export class SickDiaryPlugin {
     });
 
     this.scanCurrentFile();
-    console.log('sick diary onload');
+    console.log('sick diary onload!');
   }
 
-  async scanCurrentFile() {
+  scanCurrentFile() {
     const view = this.plugin?.app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) return;
 
@@ -164,7 +164,16 @@ export class SickDiaryPlugin {
 
     const tree = syntaxTree(editorView.state);
     console.log('syntax tree has ', tree.children.length, 'children');
-    //tree.iterate()
+    let depth = 0;
+    tree.iterate({
+      enter: node => {
+        console.log(`${' '.repeat(depth)}${node.type.name} (${node.from} - ${node.to}: ${editorView.state.doc.sliceString(node.from, node.to).substring(0, 10)})`);
+        depth++;
+      },
+      leave: () => {
+        depth--;
+      } 
+    });
   }
 
   async onunload() {
