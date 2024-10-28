@@ -159,21 +159,25 @@ export class SickDiaryPlugin {
     const view = this.plugin?.app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) return;
 
-    const editorView = (view.editor as any).cm as EditorView;
-    if (!editorView) return;
-
-    const tree = syntaxTree(editorView.state);
-    console.log('syntax tree has ', tree.children.length, 'children');
-    let depth = 0;
-    tree.iterate({
-      enter: node => {
-        console.log(`${' '.repeat(depth)}${node.type.name} (${node.from} - ${node.to}: ${editorView.state.doc.sliceString(node.from, node.to).substring(0, 10)})`);
-        depth++;
-      },
-      leave: () => {
-        depth--;
-      } 
-    });
+    const content = view.editor.getValue();
+    
+    // Regex to match ```sick code blocks
+    // This handles both ```sick and ``` sick (with space)
+    const codeBlockRegex = /```\s*sick\s*\n([\s\S]*?)```/g;
+    
+    let match;
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+        const blockContent = match[1].trim();
+        const blockPosition = match.index;
+        
+        console.log('Found sick code block:', {
+            content: blockContent,
+            position: blockPosition,
+            fullMatch: match[0]
+        });
+        
+        // Process the block content here
+    }
   }
 
   async onunload() {
