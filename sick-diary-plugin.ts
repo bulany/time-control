@@ -111,6 +111,15 @@ class SickValue {
 const things: Array<any> = [];
 let id: number = 0;
 
+/*
+Might be able to abandon this whole plugin with a dataviewjs code block like this:
+
+```dataviewjs
+console.log(dv.current());
+dv.list(dv.current().sick);
+```
+*/
+
 export class SickDiaryPlugin {
   plugin: Plugin | null = null;
   codeBlocks: Map<string, SickValue> = new Map();
