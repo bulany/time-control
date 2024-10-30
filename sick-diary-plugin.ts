@@ -5,6 +5,12 @@ import {
   MarkdownView
 } from 'obsidian';
 
+import {
+  getAPI
+} from 'obsidian-dataview'
+
+const api = getAPI();
+
 import { syntaxTree } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";
 
@@ -126,6 +132,15 @@ export class SickDiaryPlugin {
 
   async onload(plugin: Plugin) {
     this.plugin = plugin;
+
+    this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:index-ready",
+      () => { console.log('data index ready'); })
+      );
+
+    this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:metadata-change",
+    (type, file, cache) => { console.log('metadata changed'); })
+    );
+
     this.plugin.registerMarkdownCodeBlockProcessor('sick', (source: string,
       el: HTMLElement,
       ctx: MarkdownPostProcessorContext) => {
