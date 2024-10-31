@@ -141,6 +141,13 @@ export class SickDiaryPlugin {
     (type, file, cache) => { console.log('metadata changed'); })
     );
 
+    // Follow dataviews example...
+    const p = this.plugin.registerMarkdownPostProcessor(async (el, ctx) => {
+      console.log('hey there');
+    });
+    p.sortOrder = 100;
+
+
     this.plugin.registerMarkdownCodeBlockProcessor('sick', (source: string,
       el: HTMLElement,
       ctx: MarkdownPostProcessorContext) => {
