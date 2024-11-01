@@ -135,17 +135,27 @@ export class SickDiaryPlugin {
 
     this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:index-ready",
       () => { console.log('data index ready'); })
-      );
+    );
 
     this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:metadata-change",
-    (type, file, cache) => { console.log('metadata changed'); })
+      (type, file, cache) => { console.log('metadata changed'); })
     );
 
     // Follow dataviews example...
+    const priority = 200; // dataviews one is 100, so we want to run after that
     const p = this.plugin.registerMarkdownPostProcessor(async (el, ctx) => {
-      console.log('hey there');
-    });
-    p.sortOrder = 100;
+      console.log('hey', el.tagName.toLowerCase(), el.className, el.textContent);
+      for (let p of el.findAllSelf("p,h1,h2,h3,h4,h5,h6,li,span,th,td")) {
+        
+        console.log('hey there', p.nodeName, p.className, p.innerText);
+        const inlineFields = el.querySelectorAll('inline-field')
+        inlineFields.forEach(field => {
+          const text = field.textContent;
+          console.log('field:', text);
+        })
+      }
+
+    }, priority);
 
 
     this.plugin.registerMarkdownCodeBlockProcessor('sick', (source: string,
@@ -191,23 +201,23 @@ export class SickDiaryPlugin {
     if (!view) return;
 
     const content = view.editor.getValue();
-    
+
     // Regex to match ```sick code blocks
     // This handles both ```sick and ``` sick (with space)
     const codeBlockRegex = /```\s*sick\s*\n([\s\S]*?)```/g;
-    
+
     let match;
     while ((match = codeBlockRegex.exec(content)) !== null) {
-        const blockContent = match[1].trim();
-        const blockPosition = match.index;
-        
-        console.log('Found sick code block:', {
-            content: blockContent,
-            position: blockPosition,
-            fullMatch: match[0]
-        });
-        
-        // Process the block content here
+      const blockContent = match[1].trim();
+      const blockPosition = match.index;
+
+      console.log('Found sick code block:', {
+        content: blockContent,
+        position: blockPosition,
+        fullMatch: match[0]
+      });
+
+      // Process the block content here
     }
   }
 
