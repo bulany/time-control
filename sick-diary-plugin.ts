@@ -138,20 +138,29 @@ export class SickDiaryPlugin {
     );
 
     this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:metadata-change",
-      (type, file, cache) => { console.log('metadata changed'); })
+      (type, file, cache) => { 
+        
+        console.log('metadata changed'); 
+        const fields = document.getElementsByClassName('inline-field');
+        Array.from(fields).forEach(field => {
+          console.log('field', field.textContent);
+          field.createDiv('testing');
+        })
+      
+      })
     );
 
     // Follow dataviews example...
     const priority = 200; // dataviews one is 100, so we want to run after that
     const p = this.plugin.registerMarkdownPostProcessor(async (el, ctx) => {
-      console.log('hey', el.tagName.toLowerCase(), el.className, el.textContent);
+      //console.log('hey', el.tagName.toLowerCase(), el.className, el.textContent);
       for (let p of el.findAllSelf("p,h1,h2,h3,h4,h5,h6,li,span,th,td")) {
         
-        console.log('hey there', p.nodeName, p.className, p.innerText);
+       // console.log('hey there', p.nodeName, p.className, p.innerText);
         const inlineFields = el.querySelectorAll('inline-field')
         inlineFields.forEach(field => {
           const text = field.textContent;
-          console.log('field:', text);
+         // console.log('field:', text);
         })
       }
 
@@ -165,7 +174,7 @@ export class SickDiaryPlugin {
       const block = this.codeBlocks.get(blockId);
       if (block) {
         block.seenCount++;
-        console.log('block: ', block.id, 'seenCount: ', block.seenCount);
+        //console.log('block: ', block.id, 'seenCount: ', block.seenCount);
 
       } else {
         const pre = el.createEl('pre');
