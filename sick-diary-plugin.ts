@@ -137,7 +137,7 @@ export class SickDiaryPlugin {
     this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:index-ready",
       () => { console.log('data index ready'); })
     );
-*/
+
     this.plugin.registerEvent(plugin.app.metadataCache.on("dataview:metadata-change",
       (type, file, cache) => { 
         
@@ -150,15 +150,27 @@ export class SickDiaryPlugin {
       
       })
     );
-/*
+*/
     // Follow dataviews example...
-    const priority = -2000; // dataviews one is 100, so we want to run after that
+    const priority = 200; // dataviews one is 100, so we want to run after that
     const p = this.plugin.registerMarkdownPostProcessor(async (el, ctx) => {
-      console.log('immediate', el.tagName, el.className, el.textContent);
-      el.classList.add('helloworld');
+      
+      const nodeCount = el.querySelectorAll('*').length
+      if (el.tagName == 'SPAN') {
+        console.log('span', el.className, el.textContent);
+        const newEl = el.createSpan({text: 'hello'});
+        newEl.classList.add('cm-em');
+        el.classList.add('cm-em');
+        el.replaceWith(newEl)
+        
+      } else {
+        console.log('other', el.tagName, el.className, nodeCount);
+
+      }
+
 
     }, priority);
-*/
+
 
 
     this.plugin.registerMarkdownCodeBlockProcessor('sick', (source: string,
