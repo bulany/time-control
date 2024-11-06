@@ -6,15 +6,21 @@ import * as d3 from 'd3';
 import { spawn } from 'child_process';
 import { join } from 'path';
 
+
 interface VideoRegion {
-  color: string;
   start: string;
   end: string;
 }
 
-interface VideoAnnotation {
-  url: string;
+interface VideoRow {
+  label: string;
+  color: string;
   regions: VideoRegion[];
+}
+
+interface VideoAnnotation {
+  file: string;
+  rows: VideoRow[];
 }
 
 interface MPVResponse {
@@ -36,12 +42,14 @@ class MPVController {
     );
 
     // Start MPV with IPC socket
+
     this.mpvProcess = spawn('mpv', [
       `--input-ipc-server=${socketPath}`,
       '--idle=yes',
       '--keep-open=yes',
       videoPath
     ]);
+
 
     // Wait for socket to be ready
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -148,52 +156,71 @@ export class MpvPlugin {
   registerProcessor() {
     this.plugin?.registerMarkdownCodeBlockProcessor('mpv', async (source, el, ctx) => {
       try {
+        el.createEl('div', { text: 'placeholder' });
+
         const data: VideoAnnotation = JSON.parse(source.trim());
 
         // Start MPV if not already running
-        if (!this.mpvController) {
-          this.mpvController = new MPVController();
-          await this.mpvController.start(data.url);
+        try {
+          if (!this.mpvController) {
+            this.mpvController = new MPVController();
+            await this.mpvController.start(data.file);
+          }
+        } catch (e) { 
+          console.log('start error', e);
+          
         }
+
 
         // Get video duration for scaling
         const duration = await this.mpvController.getDuration();
 
+
         // Create visualization
         const width = 300;
-        const height = 40;
+        const row_height = 40;
+        const height = data.rows.length * row_height;
         const svg = d3.select(el)
           .append('svg')
           .attr('width', width)
           .attr('height', height);
-
-        // Convert timestamps to numbers for scaling
-        const regions = data.regions.map(r => ({
-          ...r,
-          startSeconds: MPVController.parseTimestamp(r.start),
-          endSeconds: MPVController.parseTimestamp(r.end)
-        }));
 
         // Create scale using actual video duration
         const timeScale = d3.scaleLinear()
           .domain([0, duration])
           .range([0, width]);
 
-        // Draw regions
-        svg.selectAll('rect')
-          .data(regions)
-          .enter()
-          .append('rect')
-          .attr('x', d => timeScale(d.startSeconds))
-          .attr('y', 5)
-          .attr('width', d => timeScale(d.endSeconds) - timeScale(d.startSeconds))
-          .attr('height', 30)
-          .attr('fill', d => d.color)
-          .attr('opacity', 0.7)
-          .style('cursor', 'pointer')
-          .on('click', async (event, d) => {
-            await this.mpvController?.seek(d.startSeconds);
-          });
+        let y = 0;
+
+        // Convert timestamps to numbers for scaling
+        data.rows.forEach(row => {
+
+          const regions = row.regions.map(r => ({
+            ...r,
+            startSeconds: MPVController.parseTimestamp(r.start),
+            endSeconds: MPVController.parseTimestamp(r.end),
+            color: row.color
+          }));
+
+          // Draw regions
+          svg.selectAll('rect')
+            .data(regions)
+            .enter()
+            .append('rect')
+            .attr('x', d => timeScale(d.startSeconds))
+            .attr('y', y + 5)
+            .attr('width', d => timeScale(d.endSeconds) - timeScale(d.startSeconds))
+            .attr('height', 30)
+            .attr('fill', d => d.color)
+            .attr('opacity', 0.7)
+            .style('cursor', 'pointer')
+            .on('click', async (event, d) => {
+              await this.mpvController?.seek(d.startSeconds);
+            });
+          y += row_height;
+        });
+
+
 
         // Add playhead indicator
         const playhead = svg.append('line')
@@ -216,6 +243,7 @@ export class MpvPlugin {
         setInterval(updatePlayhead, 100);
 
       } catch (e) {
+        console.log('error', e);
         el.createEl('div', { text: 'Error parsing video annotation data' });
       }
     });
