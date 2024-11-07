@@ -6,6 +6,10 @@ import * as d3 from 'd3';
 import { spawn } from 'child_process';
 import { join } from 'path';
 
+const MPV_PATH = '/opt/homebrew/bin/mpv';
+const SOCKET_PATH = '/tmp/obsidian-mpv-socket';
+const VIDEO_PATH = 'test.mp4'
+
 
 interface VideoRegion {
   start: string;
@@ -43,7 +47,7 @@ class MPVController {
 
     // Start MPV with IPC socket
 
-    this.mpvProcess = spawn('mpv', [
+    this.mpvProcess = spawn(MPV_PATH, [
       `--input-ipc-server=${socketPath}`,
       '--idle=yes',
       '--keep-open=yes',
@@ -121,9 +125,7 @@ class MPVController {
 }
 
 
-const MPV_PATH = '/opt/homebrew/bin/mpv';
-const SOCKET_PATH = '/tmp/obsidian-mpv-socket';
-const VIDEO_PATH = 'test.mp4'
+
 
 export class MpvPlugin {
   plugin: Plugin | null = null;
@@ -173,7 +175,8 @@ export class MpvPlugin {
 
 
         // Get video duration for scaling
-        const duration = await this.mpvController.getDuration();
+        const duration = await this.mpvController?.getDuration();
+        console.log('video duration', duration);
 
 
         // Create visualization
