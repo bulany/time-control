@@ -7,6 +7,8 @@ import { ParseDebugger } from './parse-debugger';
 
 import { MpvPlugin } from './mpv-plugin';
 import { SickDiaryPlugin } from './sick-diary-plugin';
+import { ProjectPlugin } from './project-plugin';
+
 
 
 import {
@@ -284,6 +286,7 @@ class TimerPluginValue implements PluginValue {
 
 const mpvPlugin = new MpvPlugin();
 const sickDiaryPlugin = new SickDiaryPlugin();
+const projectPlugin = new ProjectPlugin();
 
 export default class TimeControlPlugin extends Plugin {
 
@@ -294,6 +297,7 @@ export default class TimeControlPlugin extends Plugin {
 	override async onload() {
 		await mpvPlugin.onload(this);
 		await sickDiaryPlugin.onload(this);
+		await projectPlugin.onload(this);
 		await synth.initAudio();
 
 		Tone.getTransport().bpm.value = 60;
@@ -377,6 +381,7 @@ export default class TimeControlPlugin extends Plugin {
 	override async onunload() {
 		await mpvPlugin.onunload();
 		await sickDiaryPlugin.onunload();
+		await projectPlugin.onunload();
 		if (this.uninstallDebugger) {
 			this.uninstallDebugger();
 		}

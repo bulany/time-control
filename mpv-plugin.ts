@@ -178,6 +178,11 @@ export class MpvPlugin {
         const duration = await this.mpvController?.getDuration();
         console.log('video duration', duration);
 
+        const playButton = el.createEl('div', {text : 'restart video playback'});
+        playButton.addEventListener('onclick', e => {
+          console.log('try to restart player and make it full screen');
+          //this.mpvController?.command(['']);
+        });
 
         // Create visualization
         const width = 300;
@@ -196,8 +201,8 @@ export class MpvPlugin {
         let y = 0;
 
         // Convert timestamps to numbers for scaling
-        data.rows.forEach(row => {
-
+        data.rows.forEach((row, row_i) => {
+          console.log('drawing row ', row_i);
           const regions = row.regions.map(r => ({
             ...r,
             startSeconds: MPVController.parseTimestamp(r.start),
