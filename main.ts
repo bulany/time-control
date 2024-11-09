@@ -8,6 +8,7 @@ import { ParseDebugger } from './parse-debugger';
 import { MpvPlugin } from './mpv-plugin';
 import { SickDiaryPlugin } from './sick-diary-plugin';
 import { ProjectPlugin } from './project-plugin';
+import { WaveshaperPlugin } from './waveshaper-plugin';
 
 
 
@@ -287,6 +288,7 @@ class TimerPluginValue implements PluginValue {
 const mpvPlugin = new MpvPlugin();
 const sickDiaryPlugin = new SickDiaryPlugin();
 const projectPlugin = new ProjectPlugin();
+const waveshaperPlugin = new WaveshaperPlugin();
 
 export default class TimeControlPlugin extends Plugin {
 
@@ -298,6 +300,7 @@ export default class TimeControlPlugin extends Plugin {
 		await mpvPlugin.onload(this);
 		await sickDiaryPlugin.onload(this);
 		await projectPlugin.onload(this);
+		await waveshaperPlugin.onload(this);
 		await synth.initAudio();
 
 		Tone.getTransport().bpm.value = 60;

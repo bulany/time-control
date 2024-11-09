@@ -5,6 +5,7 @@ export class ProjectPlugin {
   plugin: Plugin | null = null;
   
   async onload(plugin: Plugin) {
+    console.log('project onload');
     this.plugin = plugin;
     this.plugin.registerMarkdownCodeBlockProcessor("project", (source, el) => {
       // Parse project data from the code block
@@ -77,5 +78,9 @@ export class ProjectPlugin {
         .attr("height", cellSize)
         .attr("fill", "red");
     });
+  }
+
+  async onunload() {
+    console.log('project onunload');
   }
 }
