@@ -25,13 +25,43 @@ export class ProjectPlugin {
       }
 
       // Extract and process data
+      
       const startDate = d3.timeParse("%d/%m/%Y")(project.started);
-      const months = project.duration.months || 0;
-      const endDate = d3.timeMonth.offset(startDate, months);
+      if (!startDate) {
+        el.createEl("p", { text: "Invalid start date." });
+        return;
+      }
+
+      const durationMonths = project.duration.months || 0;
       const missedDates = project.days_missed.map(date => d3.timeParse("%d/%m/%Y")(date));
       const currentDate = new Date();
 
-      const container = el.createDiv({ text: 'placeholder cal' });
+      const endDate = d3.timeMonth.offset(startDate, durationMonths);
+      const durationDays = d3.timeDay.count(startDate, endDate);
+      const completedDays = d3.timeDay.count(startDate, currentDate);
+      const completedPercent  = (completedDays / durationDays) * 100;
+      const remainingDays = d3.timeDay.count(currentDate, endDate);
+      const remainingPercent = 100 - completedPercent;
+
+      const tFormat = d3.timeFormat('%a %e %b %Y (day of year: %j)');
+
+      el.createDiv({text: `Start date is: ${tFormat(startDate)}`});
+      el.createDiv({text: `End date is: ${tFormat(endDate)}`});
+      el.createDiv({ text: `Project will take ${durationDays} days to complete` });
+      el.createDiv({ text: `Currently have completed ${completedDays} days (${completedPercent.toFixed(2)}%)` });
+      el.createDiv({ text: `There are ${remainingDays} days remaining (${remainingPercent.toFixed(2)})`});
+
+
+      // Find the first day of the year of the start date
+      const startYear = d3.timeYear.floor(startDate);
+      const endYear = d3.timeYear.ceil(d3.timeYear.offset(endDate, 1))
+      const years = d3.timeYear.range(startYear, endYear);
+      const displayedDays = d3.timeDay.count(startYear, endYear);
+      const yFormat = d3.timeFormat('%e %b %Y');
+      const yearStrings = years.map( y => yFormat(y));
+      el.createDiv({text: `Displayed days: ${displayedDays}, [${yearStrings.join(', ')}]`});
+/*
+      const container = el.createDiv();
 
       (function () {
         // Initialize random data for the demo
@@ -62,7 +92,8 @@ export class ProjectPlugin {
         });
 
         // Set custom color for the calendar heatmap
-        var color = '#cd2327';
+        //var color = '#cd2327';
+        var color = '#fd8312';
 
         // Set overview type (choices are year, month and day)
         var overview = 'year';
@@ -76,7 +107,7 @@ export class ProjectPlugin {
         calendarHeatmap.init(example_data, container, color, overview, print);
       })();
 
-
+*/
       // Generate date range for heatmap
       const days = d3.timeDays(startDate, endDate);
 
