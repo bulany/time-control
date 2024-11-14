@@ -297,10 +297,10 @@ export default class TimeControlPlugin extends Plugin {
 	uninstallDebugger: (() => void) | null = null;
 
 	override async onload() {
-		await mpvPlugin.onload(this);
-		await sickDiaryPlugin.onload(this);
+		//await mpvPlugin.onload(this);
+		//await sickDiaryPlugin.onload(this);
 		await projectPlugin.onload(this);
-		await waveshaperPlugin.onload(this);
+		//await waveshaperPlugin.onload(this);
 		await synth.initAudio();
 
 		Tone.getTransport().bpm.value = 60;
@@ -382,8 +382,8 @@ export default class TimeControlPlugin extends Plugin {
 	}
 
 	override async onunload() {
-		await mpvPlugin.onunload();
-		await sickDiaryPlugin.onunload();
+		//await mpvPlugin.onunload();
+		//await sickDiaryPlugin.onunload();
 		await projectPlugin.onunload();
 		if (this.uninstallDebugger) {
 			this.uninstallDebugger();
