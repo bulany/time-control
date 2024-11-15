@@ -8,6 +8,26 @@ interface HeatmapData {
   count: number;
 }
 
+class Rect {
+  x: string | number = 0;
+  y: string | number = 0;
+  width: string | number = '100%';
+  height: string | number = 40;
+  fill: string | number = '#E0E0E0';
+
+  constructor() {
+  }
+
+  append(g : any) {
+    return g.append('rect')
+      .attr('x', this.x)
+      .attr('y', this.y)
+      .attr('width', this.width)
+      .attr('height', this.height)
+      .attr('fill', this.fill);
+  }
+}
+
 export class ProjectPlugin {
   plugin: Plugin | null = null;
 
@@ -52,6 +72,7 @@ export class ProjectPlugin {
       el.createDiv({ text: `There are ${remainingDays} days remaining (${remainingPercent}%)` });
 
       this.drawBasicProgress(el, completedDays, remainingDays);
+      this.drawSurroundingProgress(el, startDate, endDate);
 
       // Find the first day of the year of the start date
       const startYear = d3.timeYear.floor(startDate);
@@ -216,25 +237,47 @@ export class ProjectPlugin {
     }
 
     g.append("rect")
-    .attr("x", remaining.x)
-    .attr("y", 0)
-    .attr("width", remaining.width)
-    .attr("height", height)
-    .attr("fill", remaining.color);
+      .attr("x", remaining.x)
+      .attr("y", 0)
+      .attr("width", remaining.width)
+      .attr("height", height)
+      .attr("fill", remaining.color);
 
-  if (remaining.width > 40) {  // Only show text if there's enough space
-    g.append('text')
-      .attr('x', remaining.x + remaining.width / 2)
-      .attr('y', height / 2)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', remaining.textColor)
-      .text(remainingDays);
+    if (remaining.width > 40) {  // Only show text if there's enough space
+      g.append('text')
+        .attr('x', remaining.x + remaining.width / 2)
+        .attr('y', height / 2)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('fill', remaining.textColor)
+        .text(remainingDays);
+    }
+
+
+
   }
 
+  drawSurroundingProgress(el: HTMLElement, startDate: Date, endDate: Date) {
+
+    const width = 450;
+    const height = 40;
+    const margin = { left: 10, right: 10 };
+
+    const svg = d3.select(el)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", `0 0 ${width} ${height}`);
+
+    //const g = svg.append('g')
+    //  .attr('transform', `translate(${margin.left},0)`);
+
+    const r = new Rect();
+    r.append(svg);
 
 
   }
+
 
   async getActivityData(): Promise<HeatmapData[]> {
     const files = this.plugin?.app.vault.getMarkdownFiles();
