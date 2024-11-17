@@ -259,19 +259,20 @@ export class ProjectPlugin {
 
   drawSurroundingProgress(el: HTMLElement, startDate: Date, endDate: Date) {
 
-    const width = '100%'
+    const width = 100; // percent
     const height = 40;
     const margin = { left: 10, right: 10 };
 
     const startYear = d3.timeYear.floor(startDate);
     const endYear = d3.timeYear.ceil(d3.timeYear.offset(endDate, 1))
-    const x = d3.scaleLinear([startYear, endYear], ['0%', width]);
-    const x2 = d3.scaleLinear([startYear, endYear], [0, 100]);
-    console.log('my scale', x(startDate));
+    const x = d3.scaleLinear([startYear, endYear], [0, width]);
+    const pc = (n : number) => n + '%';
 
+    const nowDate = new Date();
+  
     const svg = d3.select(el)
       .append("svg")
-      .attr("width", width)
+      .attr("width", pc(width))
       .attr("height", height);
 
     //const g = svg.append('g')
@@ -280,14 +281,17 @@ export class ProjectPlugin {
     const r = new Rect();
     r.append(svg);
 
+    // whole project
     r.x = x(startDate);
-    r.width = x2(endDate) - x2(startDate) + '%';
-    r.fill = 'green';
+    r.width = pc(x(endDate) - x(startDate));
+    r.fill = 'grey';
     r.append(svg);
 
-
-
-
+    // completed part
+    r.x = x(startDate);
+    r.width = pc(x(nowDate) - x(startDate));
+    r.fill = 'green'
+    r.append(svg);
 
   }
 
