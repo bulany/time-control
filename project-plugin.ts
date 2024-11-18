@@ -199,7 +199,6 @@ export class ProjectPlugin {
     const boundingClientWidth = clientWidth == 0 ? el.getBoundingClientRect().width : clientWidth;
     const fallbackWidth = boundingClientWidth == 0 ? 450 : boundingClientWidth;
     const width = fallbackWidth;
-    console.log('width', width);
     const barWidth = fallbackWidth - margin.left - margin.right;
     const height = 40;
 
@@ -264,9 +263,30 @@ export class ProjectPlugin {
     const margin = { left: 10, right: 10 };
 
     const startYear = d3.timeYear.floor(startDate);
-    const endYear = d3.timeYear.ceil(d3.timeYear.offset(endDate, 1))
+    const endYear = d3.timeYear.ceil(endDate);
     const x = d3.scaleLinear([startYear, endYear], [0, width]);
     const pc = (n : number) => n + '%';
+    const xp = (d : Date) => pc(x(d));
+    const wp = (d1: Date, d2 : Date) => { return pc(x(d2) - x(d1))};
+
+    // debugging
+    const f = d3.timeFormat("%d/%m/%Y");
+    const p = d3.timeParse("%d/%m/%Y");
+    const testDate = d => {
+      console.log('date', f(d), x(d).toFixed(2));
+    };
+
+    testDate(startYear);
+    testDate(endYear);
+    testDate(startDate);
+    testDate(endDate);
+    testDate(p("01/07/2024"));
+    testDate(p("01/01/2025"));
+    testDate(p("01/07/2025"));
+    testDate(p("31/12/2025"));
+    testDate(p("01/01/2027"));
+
+
 
     const nowDate = new Date();
   
@@ -278,18 +298,19 @@ export class ProjectPlugin {
     //const g = svg.append('g')
     //  .attr('transform', `translate(${margin.left},0)`);
 
+    // whole period
     const r = new Rect();
     r.append(svg);
 
     // whole project
-    r.x = x(startDate);
-    r.width = pc(x(endDate) - x(startDate));
+    r.x = xp(startDate);
+    r.width = wp(startDate, endDate);
     r.fill = 'grey';
     r.append(svg);
 
     // completed part
-    r.x = x(startDate);
-    r.width = pc(x(nowDate) - x(startDate));
+    r.x = xp(startDate);
+    r.width = wp(startDate, nowDate);
     r.fill = 'green'
     r.append(svg);
 
