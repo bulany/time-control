@@ -260,14 +260,15 @@ export class ProjectPlugin {
 
     const width = 100; // percent
     const height = 40;
-    const margin = { left: 10, right: 10 };
+    const margin = { left: 2, right: 2 };
 
     const startYear = d3.timeYear.floor(startDate);
     const endYear = d3.timeYear.ceil(endDate);
     const x = d3.scaleLinear([startYear, endYear], [0, width]);
     const pc = (n : number) => n + '%';
     const xp = (d : Date) => pc(x(d));
-    const wp = (d1: Date, d2 : Date) => { return pc(x(d2) - x(d1))};
+    const w = (d1: Date, d2 : Date) => { return x(d2) - x(d1); };
+    const wp = (d1: Date, d2 : Date) => pc(w(d1, d2));
 
     // debugging
     const f = d3.timeFormat("%d/%m/%Y");
@@ -295,24 +296,27 @@ export class ProjectPlugin {
       .attr("width", pc(width))
       .attr("height", height);
 
-    //const g = svg.append('g')
-    //  .attr('transform', `translate(${margin.left},0)`);
+    // margin container element
+    const cont = svg.append('svg')
+      .attr('x', pc(margin.left))
+      .attr('y', 0)
+      .attr('width', pc(width - (margin.left + margin.right)))
 
     // whole period
     const r = new Rect();
-    r.append(svg);
+    r.append(cont);
 
     // whole project
     r.x = xp(startDate);
     r.width = wp(startDate, endDate);
     r.fill = 'grey';
-    r.append(svg);
+    r.append(cont);
 
     // completed part
     r.x = xp(startDate);
     r.width = wp(startDate, nowDate);
     r.fill = 'green'
-    r.append(svg);
+    r.append(cont);
 
   }
 
