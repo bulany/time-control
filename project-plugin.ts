@@ -8,6 +8,24 @@ interface HeatmapData {
   count: number;
 }
 
+class Svg {
+  x: string | number = 0;
+  y: string | number = 0;
+  width: string | number = '100%';
+  height: string | number = '100%';
+
+  constructor() {
+  }
+
+  appendTo(g : any) {
+    return g.append('svg')
+      .attr('x', this.x)
+      .attr('y', this.y)
+      .attr('width', this.width)
+      .attr('height', this.height);
+  }
+}
+
 class Rect {
   x: string | number = 0;
   y: string | number = 0;
@@ -18,7 +36,7 @@ class Rect {
   constructor() {
   }
 
-  append(g : any) {
+  appendTo(g : any) {
     return g.append('rect')
       .attr('x', this.x)
       .attr('y', this.y)
@@ -27,6 +45,10 @@ class Rect {
       .attr('fill', this.fill);
   }
 }
+
+
+
+
 
 export class ProjectPlugin {
   plugin: Plugin | null = null;
@@ -291,32 +313,33 @@ export class ProjectPlugin {
 
     const nowDate = new Date();
   
-    const svg = d3.select(el)
-      .append("svg")
-      .attr("width", pc(width))
-      .attr("height", height);
+    // svg outer container
+    const s = new Svg();
+    s.width = pc(width);
+    s.height = height;
+    const svg = s.appendTo(d3.select(el));
 
-    // margin container element
-    const cont = svg.append('svg')
-      .attr('x', pc(margin.left))
-      .attr('y', 0)
-      .attr('width', pc(width - (margin.left + margin.right)))
+    // svg inner container
+    s.height = pc(100);
+    s.x = pc(margin.left);
+    s.width = pc(width - (margin.left + margin.right));
+    const cont = s.appendTo(svg);
 
     // whole period
     const r = new Rect();
-    r.append(cont);
+    r.appendTo(cont);
 
     // whole project
     r.x = xp(startDate);
     r.width = wp(startDate, endDate);
     r.fill = 'grey';
-    r.append(cont);
+    r.appendTo(cont);
 
     // completed part
     r.x = xp(startDate);
     r.width = wp(startDate, nowDate);
-    r.fill = 'green'
-    r.append(cont);
+    r.fill = 'blue'
+    r.appendTo(cont);
 
   }
 
