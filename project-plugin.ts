@@ -46,6 +46,28 @@ class Rect {
   }
 }
 
+class Text {
+  x : string | number = 0;
+  y : string | number = 0;
+  text_anchor : string = 'middle';
+  dominant_baseline : string = 'middle';
+  fill : string | number = '#E0E0E0';
+  text : string = 'text'
+
+  constructor() {}
+
+  appendTo(g: any) {
+    return g.append('text')
+    .attr('x', this.x)
+    .attr('y', this.y)
+    .attr('text-anchor', this.text_anchor)
+    .attr('dominant-baseline', this.dominant_baseline)
+    .attr('fill', this.fill)
+    .text(this.text);
+
+  }
+}
+
 
 
 
@@ -340,6 +362,14 @@ export class ProjectPlugin {
     r.width = wp(startDate, nowDate);
     r.fill = 'blue'
     r.appendTo(cont);
+
+    // completed label
+    const t = new Text();
+    t.text = `${d3.timeDay.count(startDate, nowDate)}`;
+    t.x = pc(w(startDate, nowDate)/2);
+    t.y = height / 2;
+    t.fill = 'black';
+    t.appendTo(cont);
 
   }
 
