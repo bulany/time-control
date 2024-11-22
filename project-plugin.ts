@@ -313,6 +313,8 @@ export class ProjectPlugin {
     const xp = (d : Date) => pc(x(d));
     const w = (d1: Date, d2 : Date) => { return x(d2) - x(d1); };
     const wp = (d1: Date, d2 : Date) => pc(w(d1, d2));
+    const cent = (d1: Date, d2: Date) => { return w(d1, d2)/2 + x(d1); };
+    const cent_pc = (d1: Date, d2: Date) => { return pc(cent(d1, d2)); };
 
     // debugging
     const f = d3.timeFormat("%d/%m/%Y");
@@ -331,10 +333,11 @@ export class ProjectPlugin {
     testDate(p("31/12/2025"));
     testDate(p("01/01/2027"));
 
-
-
     const nowDate = new Date();
   
+    const completed = { color: "#4CAF50", textColor: "white" };
+    const remaining = { color: "#E0E0E0", textColor: "#666" };
+
     // svg outer container
     const s = new Svg();
     s.width = pc(width);
@@ -349,26 +352,34 @@ export class ProjectPlugin {
 
     // whole period
     const r = new Rect();
+    r.fill = '#eee';
     r.appendTo(cont);
 
     // whole project
     r.x = xp(startDate);
     r.width = wp(startDate, endDate);
-    r.fill = 'grey';
+    r.fill = remaining.color;
     r.appendTo(cont);
 
     // completed part
     r.x = xp(startDate);
     r.width = wp(startDate, nowDate);
-    r.fill = 'blue'
+    r.fill = completed.color;
     r.appendTo(cont);
 
     // completed label
     const t = new Text();
     t.text = `${d3.timeDay.count(startDate, nowDate)}`;
-    t.x = pc(w(startDate, nowDate)/2);
+    t.x = cent_pc(startDate, nowDate);
     t.y = height / 2;
-    t.fill = 'black';
+    t.fill = completed.textColor;
+    t.appendTo(cont);
+
+    // remaining label
+    t.text = `${d3.timeDay.count(nowDate, endDate)}`;
+    t.x = cent_pc(nowDate, endDate);
+    t.y = height / 2;
+    t.fill = remaining.textColor;
     t.appendTo(cont);
 
   }
