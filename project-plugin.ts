@@ -382,6 +382,15 @@ export class ProjectPlugin {
     t.fill = remaining.textColor;
     t.appendTo(cont);
 
+    // year labels
+    const years = d3.timeYear.range(startYear, endYear);
+    years.forEach(year => {
+      const nextYear = d3.timeYear.offset(year, 1);
+      t.text = d3.timeFormat('%Y')(year);
+      t.x  = cent_pc(year, nextYear);
+      t.appendTo(cont);
+    });
+
   }
 
 
