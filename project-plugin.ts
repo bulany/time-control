@@ -68,6 +68,24 @@ class Text {
   }
 }
 
+class Tick {
+  x : string | number = '0%';
+  y1 : string | number = '0%';
+  y2 : string | number = '100%';
+  stroke : string = 'black';
+
+  constructor() {}
+
+  appendTo(g: any) {
+    return g.append('line')
+    .attr('x1', this.x)
+    .attr('x2', this.x)
+    .attr('y1', this.y1)
+    .attr('y2', this.y2)
+    .attr('stroke', this.stroke);
+  }
+}
+
 
 
 
@@ -389,6 +407,15 @@ export class ProjectPlugin {
       t.text = d3.timeFormat('%Y')(year);
       t.x  = cent_pc(year, nextYear);
       t.appendTo(cont);
+    });
+
+    // 6 month ticks
+    const tick = new Tick();
+    const sixMonths = d3.timeMonth.range(startYear, endYear, 6);
+    sixMonths.push(endYear);
+    sixMonths.forEach(m => {
+      tick.x = xp(m);
+      tick.appendTo(cont);
     });
 
   }
