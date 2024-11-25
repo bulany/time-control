@@ -17,7 +17,7 @@ class Svg {
   constructor() {
   }
 
-  appendTo(g : any) {
+  appendTo(g: any) {
     return g.append('svg')
       .attr('x', this.x)
       .attr('y', this.y)
@@ -36,7 +36,7 @@ class Rect {
   constructor() {
   }
 
-  appendTo(g : any) {
+  appendTo(g: any) {
     return g.append('rect')
       .attr('x', this.x)
       .attr('y', this.y)
@@ -47,42 +47,42 @@ class Rect {
 }
 
 class Text {
-  x : string | number = 0;
-  y : string | number = 0;
-  text_anchor : string = 'middle';
-  dominant_baseline : string = 'middle';
-  fill : string | number = '#E0E0E0';
-  text : string = 'text'
+  x: string | number = 0;
+  y: string | number = 0;
+  text_anchor: string = 'middle';
+  dominant_baseline: string = 'middle';
+  fill: string | number = '#E0E0E0';
+  text: string = 'text'
 
-  constructor() {}
+  constructor() { }
 
   appendTo(g: any) {
     return g.append('text')
-    .attr('x', this.x)
-    .attr('y', this.y)
-    .attr('text-anchor', this.text_anchor)
-    .attr('dominant-baseline', this.dominant_baseline)
-    .attr('fill', this.fill)
-    .text(this.text);
+      .attr('x', this.x)
+      .attr('y', this.y)
+      .attr('text-anchor', this.text_anchor)
+      .attr('dominant-baseline', this.dominant_baseline)
+      .attr('fill', this.fill)
+      .text(this.text);
 
   }
 }
 
 class Tick {
-  x : string | number = '0%';
-  y1 : string | number = '0%';
-  y2 : string | number = '100%';
-  stroke : string = 'black';
+  x: string | number = '0%';
+  y1: string | number = '0%';
+  y2: string | number = '100%';
+  stroke: string = 'black';
 
-  constructor() {}
+  constructor() { }
 
   appendTo(g: any) {
     return g.append('line')
-    .attr('x1', this.x)
-    .attr('x2', this.x)
-    .attr('y1', this.y1)
-    .attr('y2', this.y2)
-    .attr('stroke', this.stroke);
+      .attr('x1', this.x)
+      .attr('x2', this.x)
+      .attr('y1', this.y1)
+      .attr('y2', this.y2)
+      .attr('stroke', this.stroke);
   }
 }
 
@@ -327,11 +327,11 @@ export class ProjectPlugin {
     const startYear = d3.timeYear.floor(startDate);
     const endYear = d3.timeYear.ceil(endDate);
     const x = d3.scaleLinear([startYear, endYear], [0, width]);
-    const pc = (n : number) => n + '%';
-    const xp = (d : Date) => pc(x(d));
-    const w = (d1: Date, d2 : Date) => { return x(d2) - x(d1); };
-    const wp = (d1: Date, d2 : Date) => pc(w(d1, d2));
-    const cent = (d1: Date, d2: Date) => { return w(d1, d2)/2 + x(d1); };
+    const pc = (n: number) => n + '%';
+    const xp = (d: Date) => pc(x(d));
+    const w = (d1: Date, d2: Date) => { return x(d2) - x(d1); };
+    const wp = (d1: Date, d2: Date) => pc(w(d1, d2));
+    const cent = (d1: Date, d2: Date) => { return w(d1, d2) / 2 + x(d1); };
     const cent_pc = (d1: Date, d2: Date) => { return pc(cent(d1, d2)); };
 
     // debugging
@@ -352,7 +352,7 @@ export class ProjectPlugin {
     testDate(p("01/01/2027"));
 
     const nowDate = new Date();
-  
+
     const completed = { color: "#4CAF50", textColor: "white" };
     const remaining = { color: "#E0E0E0", textColor: "#666" };
 
@@ -405,15 +405,42 @@ export class ProjectPlugin {
     years.forEach(year => {
       const nextYear = d3.timeYear.offset(year, 1);
       t.text = d3.timeFormat('%Y')(year);
-      t.x  = cent_pc(year, nextYear);
+      t.x = cent_pc(year, nextYear);
       t.appendTo(cont);
     });
 
-    // 6 month ticks
+    // Yearly ticks
     const tick = new Tick();
+    tick.y1 = pc(0);
+    tick.y2 = pc(100);
+    const yearly = d3.timeYear.range(startYear, endYear, 1);
+    yearly.push(endYear);
+    yearly.forEach(m => {
+      tick.x = xp(m);
+      tick.appendTo(cont);
+    });
+
+    // 6 month ticks
+    tick.y1 = pc(100-50);
     const sixMonths = d3.timeMonth.range(startYear, endYear, 6);
     sixMonths.push(endYear);
     sixMonths.forEach(m => {
+      tick.x = xp(m);
+      tick.appendTo(cont);
+    });
+
+    // 3 month ticks
+    tick.y1 = pc(100-25);
+    const threeMonths = d3.timeMonth.range(startYear, endYear, 3);
+    threeMonths.forEach(m => {
+      tick.x = xp(m);
+      tick.appendTo(cont);
+    });
+
+    // 1 month ticks
+    tick.y1 = pc(100-12.5);
+    const oneMonths = d3.timeMonth.range(startYear, endYear, 1);
+    oneMonths.forEach(m => {
       tick.x = xp(m);
       tick.appendTo(cont);
     });
