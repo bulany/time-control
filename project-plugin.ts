@@ -135,6 +135,7 @@ export class ProjectPlugin {
 
       this.drawBasicProgress(el, completedDays, remainingDays);
       this.drawSurroundingProgress(el, startDate, endDate);
+      this.drawGithubProgress(el, startDate, endDate);
 
       // Find the first day of the year of the start date
       const startYear = d3.timeYear.floor(startDate);
@@ -444,6 +445,32 @@ export class ProjectPlugin {
       tick.x = xp(m);
       tick.appendTo(cont);
     });
+
+  }
+
+  drawGithubProgress(el: HTMLElement, startDate: Date, endDate: Date) {
+
+    const width = 100; // percent
+    const height = 40;
+    const margin = { left: 2, right: 2 };
+
+    const startYear = d3.timeYear.floor(startDate);
+    const endYear = d3.timeYear.ceil(endDate);
+    const x = d3.scaleLinear([startYear, endYear], [0, width]);
+    const pc = (n: number) => n + '%';
+    const xp = (d: Date) => pc(x(d));
+    const w = (d1: Date, d2: Date) => { return x(d2) - x(d1); };
+    const wp = (d1: Date, d2: Date) => pc(w(d1, d2));
+    const cent = (d1: Date, d2: Date) => { return w(d1, d2) / 2 + x(d1); };
+    const cent_pc = (d1: Date, d2: Date) => { return pc(cent(d1, d2)); };
+
+    const nowDate = new Date();
+
+    const svg = new Svg();
+    const cont = svg.appendTo(d3.select(el));
+    const rect = new Rect();
+    rect.fill = 'blue';
+    rect.appendTo(cont);
 
   }
 
