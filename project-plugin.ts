@@ -450,12 +450,15 @@ export class ProjectPlugin {
 
   drawGithubProgress(el: HTMLElement, startDate: Date, endDate: Date) {
 
+    const numWeekDays = 7;
+    const squareHeight = 15;
+    const squareSpace = 4;
     const width = 100; // percent
-    const height = 40;
+    const height = numWeekDays * squareHeight + (numWeekDays - 1) * squareSpace;
     const margin = { left: 2, right: 2 };
 
     const startYear = d3.timeYear.floor(startDate);
-    const endYear = d3.timeYear.ceil(endDate);
+    const endYear = d3.timeYear.ceil(startDate);
     const x = d3.scaleLinear([startYear, endYear], [0, width]);
     const pc = (n: number) => n + '%';
     const xp = (d: Date) => pc(x(d));
@@ -467,10 +470,29 @@ export class ProjectPlugin {
     const nowDate = new Date();
 
     const svg = new Svg();
+    svg.height = height;
     const cont = svg.appendTo(d3.select(el));
     const rect = new Rect();
-    rect.fill = 'blue';
+    rect.height = height;
+    rect.fill = '#eee';
     rect.appendTo(cont);
+
+    const weeks = d3.timeWeek.range(startYear, endYear);
+    rect.fill = 'green';
+    const widthPlus = (100 / weeks.length);
+    console.log('hey there', weeks.length);
+    rect.width = pc(0.95 * widthPlus);
+    rect.height = squareHeight;
+    weeks.forEach(week => {
+      rect.x = xp(week);
+      const days = d3.timeDay.range(week, d3.timeWeek.offset(week, 1));
+      let dayNum = 0;
+      days.forEach(day => {
+        rect.y = dayNum * (squareHeight + squareSpace);
+        dayNum++;
+        rect.appendTo(cont);
+      })
+    });
 
   }
 
