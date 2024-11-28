@@ -458,14 +458,26 @@ export class ProjectPlugin {
     const margin = { left: 2, right: 2 };
 
     const startYear = d3.timeYear.floor(startDate);
-    const endYear = d3.timeYear.ceil(startDate);
-    const x = d3.scaleLinear([startYear, endYear], [0, width]);
+    const startMonday = d3.timeMonday.floor(startYear);
+    const endYear = d3.timeMonth.offset(startYear, 24);
+    const endMonday = d3.timeMonday.ceil(endYear);
+    const x = d3.scaleLinear([startMonday, endMonday], [0, width]);
     const pc = (n: number) => n + '%';
     const xp = (d: Date) => pc(x(d));
     const w = (d1: Date, d2: Date) => { return x(d2) - x(d1); };
     const wp = (d1: Date, d2: Date) => pc(w(d1, d2));
     const cent = (d1: Date, d2: Date) => { return w(d1, d2) / 2 + x(d1); };
     const cent_pc = (d1: Date, d2: Date) => { return pc(cent(d1, d2)); };
+
+    // debugging
+    const f = d3.timeFormat("%d/%m/%Y");
+    const testDate = d => {
+      console.log('my date', f(d), x(d).toFixed(2));
+    };
+    testDate(startYear);
+    testDate(startMonday);
+    testDate(endMonday);
+    testDate(endYear);
 
     const nowDate = new Date();
 
@@ -477,13 +489,14 @@ export class ProjectPlugin {
     rect.fill = '#eee';
     rect.appendTo(cont);
 
-    const weeks = d3.timeWeek.range(startYear, endYear);
+    const weeks = d3.timeMonday.range(startMonday, endMonday);
     rect.fill = 'green';
     const widthPlus = (100 / weeks.length);
     console.log('hey there', weeks.length);
-    rect.width = pc(0.95 * widthPlus);
+    rect.width = pc(0.90 * widthPlus);
     rect.height = squareHeight;
     weeks.forEach(week => {
+      testDate(week);
       rect.x = xp(week);
       const days = d3.timeDay.range(week, d3.timeWeek.offset(week, 1));
       let dayNum = 0;
