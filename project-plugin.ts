@@ -469,6 +469,21 @@ export class ProjectPlugin {
     const cent = (d1: Date, d2: Date) => { return w(d1, d2) / 2 + x(d1); };
     const cent_pc = (d1: Date, d2: Date) => { return pc(cent(d1, d2)); };
 
+    // tooltip
+    const tooltip = d3.select(el).append("div")
+    .style("position", "absolute")
+    .style("background-color", "#fff")
+    .style("border", "1px solid #ccc")
+    .style("padding", "5px")
+    .style("border-radius", "5px")
+    .style("pointer-events", "none")
+    .style("font-size", "12px")
+    .style("opacity", 1)
+    .style("transition", "opacity 0.2s");
+
+    tooltip.html('Just testing');
+
+
     // debugging
     const f = d3.timeFormat("%d/%m/%Y");
     const testDate = d => {
@@ -484,6 +499,7 @@ export class ProjectPlugin {
     const svg = new Svg();
     svg.height = height;
     const cont = svg.appendTo(d3.select(el));
+    cont.style('cursor', 'default');
     const rect = new Rect();
     rect.height = height;
     rect.fill = '#eee';
@@ -496,14 +512,31 @@ export class ProjectPlugin {
     rect.width = pc(0.90 * widthPlus);
     rect.height = squareHeight;
     weeks.forEach(week => {
-      testDate(week);
       rect.x = xp(week);
       const days = d3.timeDay.range(week, d3.timeWeek.offset(week, 1));
       let dayNum = 0;
       days.forEach(day => {
         rect.y = dayNum * (squareHeight + squareSpace);
         dayNum++;
-        rect.appendTo(cont);
+        const r = rect.appendTo(cont);
+        r.on('mouseover', event => {
+          const [x1, y1] = d3.pointer(event, el);
+          tooltip
+          .style("opacity", 1)
+          .html(`${f(day)}`)
+          .style("left", `${x1 + 10}px`)
+          .style("top", `${y1 + 10}px`);
+        })
+        r.on('mousemove', event => {
+          const [x1, y1] = d3.pointer(event, el);
+          tooltip
+          .style("left", `${x1 + 10}px`)
+          .style("top", `${y1 + 10}px`);
+        })
+        r.on('mouseout', () => {
+          tooltip
+          .style("opacity", 0);
+        })
       })
     });
 
