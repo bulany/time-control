@@ -505,6 +505,20 @@ export class ProjectPlugin {
     rect.fill = '#eee';
     rect.appendTo(cont);
 
+
+    const color = (date : Date, status : string) => {
+      let baseColor = d3.color('#dddddd'); // grey
+      if (status == 'completed') {
+        baseColor = d3.color('#40c463'); // github green
+      } else if (status == 'pending') {
+        baseColor = d3.color('#ff6a6a'); // 'indian' red
+      }
+      const c1 = baseColor;
+      const c2 = c1.brighter(0.5);
+      const colorFn = d3.scaleLinear([0, 1], [c1.formatHex(), c2.formatHex()]);
+      return colorFn(date.getMonth() % 2);
+    }
+
     const weeks = d3.timeMonday.range(startMonday, endMonday);
     rect.fill = 'green';
     const widthPlus = (100 / weeks.length);
@@ -517,6 +531,11 @@ export class ProjectPlugin {
       let dayNum = 0;
       days.forEach(day => {
         rect.y = dayNum * (squareHeight + squareSpace);
+        let status = 'outside';
+        if (day > startDate && day < endDate) {
+          status = day <= nowDate ? 'completed' : 'pending';
+        }
+        rect.fill = color(day, status);
         dayNum++;
         const r = rect.appendTo(cont);
         r.on('mouseover', event => {
