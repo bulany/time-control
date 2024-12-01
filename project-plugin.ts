@@ -68,6 +68,25 @@ class Text {
   }
 }
 
+type D3Selection = d3.Selection<d3.BaseType, unknown, null, undefined>;
+
+function flashColor(g: D3Selection) {
+    const origColor = d3.color('steelblue');
+    const flashColor1 = origColor?.darker(1);
+    const flashColor2 = origColor?.brighter(1);
+    const anim = g.append('animate')
+      .attr('attributeName', 'fill')
+      .attr('values', `${flashColor1?.formatHex()}; ${flashColor2?.formatHex()}; ${flashColor1?.formatHex()}`)
+      .attr('dur', '1s')
+      .attr('repeatCount', 'indefinite')
+}
+
+function isWithinDay(day, date) {
+  const d1 = d3.timeDay.floor(day);
+  const d2 = d3.timeDay.offset(d1, 1);
+  return date >= d1 && date < d2;
+}
+
 class Tick {
   x: string | number = '0%';
   y1: string | number = '0%';
@@ -556,6 +575,10 @@ export class ProjectPlugin {
           tooltip
           .style("opacity", 0);
         })
+        if (isWithinDay(day, nowDate)) {
+          flashColor(r);
+          console.log('will flash this', r.node(), f(day));
+        }
       })
     });
 
