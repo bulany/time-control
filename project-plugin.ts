@@ -71,9 +71,11 @@ class Text {
 type D3Selection = d3.Selection<d3.BaseType, unknown, null, undefined>;
 
 function flashColor(g: D3Selection) {
-    const origColor = d3.color('steelblue');
-    const flashColor1 = origColor?.darker(1);
-    const flashColor2 = origColor?.brighter(1);
+    const origColor = d3.color(g.attr('fill')) ||  d3.gray(50);
+    const hslColor = d3.hsl(origColor);
+    hslColor.h += 90; // rotate 90 (e.g. turn green into blue)
+    const flashColor1 = hslColor?.darker(0.3);
+    const flashColor2 = hslColor?.brighter(0.3);
     const anim = g.append('animate')
       .attr('attributeName', 'fill')
       .attr('values', `${flashColor1?.formatHex()}; ${flashColor2?.formatHex()}; ${flashColor1?.formatHex()}`)
