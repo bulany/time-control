@@ -2,6 +2,7 @@ import { Plugin } from 'obsidian';
 import * as d3 from 'd3'
 import calendarHeatmap from './calendar-heatmap';
 import moment from 'moment';
+//import { SvgTemplate, RectTemplate } from 'd4'
 
 interface HeatmapData {
   date: Date;
@@ -157,6 +158,7 @@ export class ProjectPlugin {
       this.drawBasicProgress(el, completedDays, remainingDays);
       this.drawSurroundingProgress(el, startDate, endDate);
       this.drawGithubProgress(el, startDate, endDate);
+      this.drawTodayProgress(el);
 
       // Find the first day of the year of the start date
       const startYear = d3.timeYear.floor(startDate);
@@ -499,11 +501,8 @@ export class ProjectPlugin {
     .style("border-radius", "5px")
     .style("pointer-events", "none")
     .style("font-size", "12px")
-    .style("opacity", 1)
+    .style("opacity", 0)
     .style("transition", "opacity 0.2s");
-
-    tooltip.html('Just testing');
-
 
     // debugging
     const f = d3.timeFormat("%d/%m/%Y");
@@ -579,10 +578,45 @@ export class ProjectPlugin {
         })
         if (isWithinDay(day, nowDate)) {
           flashColor(r);
-          console.log('will flash this', r.node(), f(day));
         }
       })
     });
+
+  }
+
+  drawTodayProgress(el : HTMLElement) {
+    const margin = 20;
+    const legendHeight = 20
+    const barHeight = 40;
+    const totalHeight = 2*legendHeight + barHeight;
+
+    const div = d3.select(el).append('div')
+      .style('margin', '5px');
+
+    const svgT = new Svg();
+    svgT.height = totalHeight;
+    const svg = svgT.appendTo(div);
+
+    const rectT = new Rect();
+    rectT.height = barHeight;
+    rectT.y = legendHeight;
+    rectT.fill = 'steelblue';
+    rectT.appendTo(svg);
+
+    const nowDate = new Date();
+    const d1 = d3.timeDay.floor(nowDate);
+    const d2 = d3.timeDay.offset(d1, 1);
+    const x = d3.scaleLinear([d1, d2], [0, 100]);
+    const tickT = new Tick();
+    const ticks_6hours = d3.timeHour.range(d1, d2, 6);
+    ticks_6hours.forEach(tick => {
+      tickT.x = `${x(tick)}%`;
+      tickT.appendTo(svg);
+    });
+
+    tickT.x = `${x(nowDate)}%`;
+    tickT.stroke = 'red';
+    tickT.appendTo(svg);
 
   }
 
