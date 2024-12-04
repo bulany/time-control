@@ -2,7 +2,7 @@ import { Plugin } from 'obsidian';
 import * as d3 from 'd3'
 import calendarHeatmap from './calendar-heatmap';
 import moment from 'moment';
-//import { SvgTemplate, RectTemplate } from 'd4'
+import { SvgTemplate, RectTemplate, TicksTemplate } from 'd4'
 
 interface HeatmapData {
   date: Date;
@@ -604,16 +604,22 @@ export class ProjectPlugin {
     rectT.appendTo(svg);
 
     const nowDate = new Date();
+    // Ticks
     const d1 = d3.timeDay.floor(nowDate);
     const d2 = d3.timeDay.offset(d1, 1);
     const x = d3.scaleLinear([d1, d2], [0, 100]);
-    const tickT = new Tick();
-    const ticks_6hours = d3.timeHour.range(d1, d2, 6);
-    ticks_6hours.forEach(tick => {
-      tickT.x = `${x(tick)}%`;
-      tickT.appendTo(svg);
-    });
 
+    const ticksT = new TicksTemplate();
+    ticksT.timeBase = d3.timeHour;
+    ticksT.t1 = d3.timeDay.floor(nowDate);
+    ticksT.t2 = d3.timeDay.offset(ticksT.t1, 1);
+    ticksT.steps = [6, 3, 1];
+    ticksT.top = legendHeight;
+    ticksT.bottom = legendHeight + barHeight;
+    ticksT.appendTo(svg);
+
+    // now tick
+    const tickT = new Tick();
     tickT.x = `${x(nowDate)}%`;
     tickT.stroke = 'red';
     tickT.appendTo(svg);
