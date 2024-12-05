@@ -624,6 +624,19 @@ export class ProjectPlugin {
     tickT.stroke = 'red';
     tickT.appendTo(svg);
 
+    // Hours legend
+    const hours = d3.timeHour.range(ticksT.t1, ticksT.t2, 3);
+    const hourLabels = hours.map(hour => {return {x: x(hour), text: hour.getHours()}});
+    hourLabels.push({x: x(ticksT.t2), text: 24})
+    const textT = new Text();
+    textT.fill = 'black';
+    textT.y = legendHeight + barHeight + legendHeight/2;
+    hourLabels.forEach(label => {
+      textT.x = `${label.x}%`
+      textT.text = label.text + '';
+      textT.appendTo(svg);
+    });
+
   }
 
 
