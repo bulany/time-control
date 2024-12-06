@@ -604,11 +604,32 @@ export class ProjectPlugin {
     rectT.appendTo(svg);
 
     const nowDate = new Date();
-    // Ticks
+
+
     const d1 = d3.timeDay.floor(nowDate);
     const d2 = d3.timeDay.offset(d1, 1);
     const x = d3.scaleLinear([d1, d2], [0, 100]);
+    const pc = (d : number) => d + '%';
+    const pcx = (d : Date) => pc(x(d));
+    const pcw = (d1 : Date, d2 : Date) => { return pc(x(d2) -  x(d1)); };
 
+    // Color gradient rectangles
+    const g1 = '#888';
+    const g2 = '#ddd';
+    const c1 = d3.scaleLinear([0, 50, 100], [g1, g2, g1]);
+    const c2 = d3.scaleLinear([d1, d2], [0, 100]);
+    const c3 = (d : Date) => c1(c2(d));
+
+    const hrs = d3.timeHour.range(d1, d2, 1);
+    hrs.forEach(hour => {
+      const nextHour = d3.timeHour.offset(hour, 1);
+      rectT.x = pcx(hour);
+      rectT.width = pcw(hour, nextHour);
+      rectT.fill = c3(hour);
+      rectT.appendTo(svg);
+    });
+
+    // Ticks
     const ticksT = new TicksTemplate();
     ticksT.timeBase = d3.timeHour;
     ticksT.t1 = d3.timeDay.floor(nowDate);
@@ -636,6 +657,9 @@ export class ProjectPlugin {
       textT.text = label.text + '';
       textT.appendTo(svg);
     });
+
+
+
 
   }
 
