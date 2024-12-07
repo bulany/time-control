@@ -98,3 +98,43 @@ export class TicksTemplate {
     });
   }
 }
+
+export class ToolTip {
+  tooltip : any = null;
+
+  appendTooltip(el : HTMLElement) {
+    this.tooltip = d3.select(el).append("div")
+    .style("position", "absolute")
+    .style("background-color", "#fff")
+    .style("border", "1px solid #ccc")
+    .style("padding", "5px")
+    .style("border-radius", "5px")
+    .style("pointer-events", "none")
+    .style("font-size", "12px")
+    .style("opacity", 0)
+    .style("transition", "opacity 0.2s");
+  }
+
+  addTip(g : any, text : string) {
+    g.on('mouseover', event => {
+      const [x1, y1] = d3.pointer(event, g);
+      this.tooltip
+      .style("opacity", 1)
+      .html(text)
+      .style("left", `${x1 + 10}px`)
+      .style("top", `${y1 + 10}px`);
+    })
+    g.on('mousemove', event => {
+      const [x1, y1] = d3.pointer(event, g);
+      this.tooltip
+      .style("left", `${x1 + 10}px`)
+      .style("top", `${y1 + 10}px`);
+    })
+    g.on('mouseout', () => {
+      this.tooltip
+      .style("opacity", 0);
+    })
+  }
+
+
+}
