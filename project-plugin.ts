@@ -2,7 +2,7 @@ import { Plugin } from 'obsidian';
 import * as d3 from 'd3'
 import calendarHeatmap from './calendar-heatmap';
 import moment from 'moment';
-import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip } from 'd4'
+import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate } from 'd4'
 
 interface HeatmapData {
   date: Date;
@@ -159,6 +159,7 @@ export class ProjectPlugin {
       this.drawSurroundingProgress(el, startDate, endDate);
       this.drawGithubProgress(el, startDate, endDate);
       this.drawTodayProgress(el);
+      
 
       // Find the first day of the year of the start date
       const startYear = d3.timeYear.floor(startDate);
@@ -613,12 +614,24 @@ export class ProjectPlugin {
     const pcx = (d : Date) => pc(x(d));
     const pcw = (d1 : Date, d2 : Date) => { return pc(x(d2) -  x(d1)); };
 
+
+    
     // Color gradient rectangles
     const g1 = '#888';
     const g2 = '#ddd';
     const c1 = d3.scaleLinear([0, 50, 100], [g1, g2, g1]);
     const c2 = d3.scaleLinear([d1, d2], [0, 100]);
     const c3 = (d : Date) => c1(c2(d));
+
+    const darkGray = g1;
+    const lightGray = g2;
+    const red = '#800';
+    const blue = '#008';
+
+
+    const dayT = new DayTemplate();
+    dayT.colorGradient = d3.scaleLinear([0, 10, 20, 50, 80, 90, 100], [darkGray, red, blue, lightGray, blue, red, darkGray]);
+    dayT.appendTo(d3.select(el));
 
     const tooltip = new ToolTip();
     tooltip.appendTooltip(el);
@@ -661,6 +674,7 @@ export class ProjectPlugin {
       textT.text = label.text + '';
       textT.appendTo(svg);
     });
+
 
 
 

@@ -1,5 +1,8 @@
 import * as d3 from 'd3'
 
+function pc(n : number) { return n + '%'; }
+
+
 export class SvgTemplate {
   x : string | number = 0;
   y : string | number = 0;
@@ -60,7 +63,6 @@ export class TickTemplate {
   }
 }
 
-function pc(n : number) { return n + '%'; }
 
 export class TicksTemplate {
 
@@ -137,4 +139,46 @@ export class ToolTip {
   }
 
 
+}
+
+
+export class DayTemplate {
+
+  darkGray : string = '#888';
+  lightGray : string = '#ddd';
+  colorGradient = d3.scaleLinear([0, 50, 100], [this.darkGray, this.lightGray, this.darkGray]);
+  date : Date = new Date();
+  x : number = 0;
+  y : number = 0;
+  width : number = 100;
+  height : number = 40;
+
+  appendTo(g : any) {
+    const svgT = new SvgTemplate();
+    svgT.height = this.height;
+
+    const svg = svgT.appendTo(g);
+    
+
+    const d1 = d3.timeDay.floor(this.date);
+    const d2 = d3.timeDay.offset(d1, 1);
+    const dateToPc = d3.scaleLinear([d1, d2], [0, 100]);
+    const dateToColor = (d : Date) => this.colorGradient(dateToPc(d));
+    const x = d3.scaleLinear([d1, d2], [0, this.width]);
+    const pcx = (d : Date) => pc(x(d));
+    const pcw = (d1 : Date, d2 : Date) => { return pc(x(d2) -  x(d1)); };
+
+    const rectT = new RectTemplate();
+    rectT.y = this.y;
+    rectT.height = this.height;
+
+    const hrs = d3.timeHour.range(d1, d2, 1);
+    hrs.forEach(hour => {
+      const nextHour = d3.timeHour.offset(hour, 1);
+      rectT.x = pcx(hour);
+      rectT.width = pcw(hour, nextHour);
+      rectT.fill = dateToColor(hour);
+      const rect = rectT.appendTo(svg);
+    });
+  }
 }
