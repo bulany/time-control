@@ -146,7 +146,8 @@ export class DayTemplate {
 
   darkGray : string = '#888';
   lightGray : string = '#ddd';
-  colorGradient = d3.scaleLinear([0, 50, 100], [this.darkGray, this.lightGray, this.darkGray]);
+  colorGradient = d3.scaleLinear([0, 100], [this.darkGray, this.lightGray]);
+  symGradient = d3.scaleLinear([0, 50, 100], [0, 100, 0]);
   date : Date = new Date();
   x : number = 0;
   y : number = 0;
@@ -163,7 +164,7 @@ export class DayTemplate {
     const d1 = d3.timeDay.floor(this.date);
     const d2 = d3.timeDay.offset(d1, 1);
     const dateToPc = d3.scaleLinear([d1, d2], [0, 100]);
-    const dateToColor = (d : Date) => this.colorGradient(dateToPc(d));
+    const dateToColor = (d : Date) => this.colorGradient(this.symGradient(dateToPc(d)));
     const x = d3.scaleLinear([d1, d2], [0, this.width]);
     const pcx = (d : Date) => pc(x(d));
     const pcw = (d1 : Date, d2 : Date) => { return pc(x(d2) -  x(d1)); };
@@ -177,7 +178,8 @@ export class DayTemplate {
       const nextHour = d3.timeHour.offset(hour, 1);
       rectT.x = pcx(hour);
       rectT.width = pcw(hour, nextHour);
-      rectT.fill = dateToColor(hour);
+      const halfHour = d3.timeMinute.offset(hour, 30);
+      rectT.fill = dateToColor(halfHour);
       const rect = rectT.appendTo(svg);
     });
   }

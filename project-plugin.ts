@@ -627,10 +627,12 @@ export class ProjectPlugin {
     const lightGray = g2;
     const red = '#800';
     const blue = '#008';
+    const yellow = '#fcff9e';
+    const orange = '#c67700';
 
 
     const dayT = new DayTemplate();
-    dayT.colorGradient = d3.scaleLinear([0, 10, 20, 50, 80, 90, 100], [darkGray, red, blue, lightGray, blue, red, darkGray]);
+    dayT.colorGradient = d3.scaleLinear([0, 100], [orange, yellow]);
     dayT.appendTo(d3.select(el));
 
     const tooltip = new ToolTip();
