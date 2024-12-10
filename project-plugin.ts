@@ -2,7 +2,7 @@ import { Plugin } from 'obsidian';
 import * as d3 from 'd3'
 import calendarHeatmap from './calendar-heatmap';
 import moment from 'moment';
-import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate } from 'd4'
+import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate, HoursGridTemplate } from 'd4'
 
 interface HeatmapData {
   date: Date;
@@ -634,6 +634,9 @@ export class ProjectPlugin {
     const dayT = new DayTemplate();
     dayT.colorGradient = d3.scaleLinear([0, 100], [orange, yellow]);
     dayT.appendTo(d3.select(el));
+
+    const hoursGridT = new HoursGridTemplate();
+    hoursGridT.appendTo(d3.select(el));    
 
     const tooltip = new ToolTip();
     tooltip.appendTooltip(el);

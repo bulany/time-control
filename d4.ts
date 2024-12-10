@@ -54,6 +54,8 @@ export class TickTemplate {
   constructor() { }
 
   appendTo(g: any) {
+    console.log('appending line', this.x);
+    g.append('circle').attr('r', 3).attr('fill', 'blue').attr('cx', this.x);
     return g.append('line')
       .attr('x1', this.x)
       .attr('x2', this.x)
@@ -94,10 +96,12 @@ export class TicksTemplate {
         tickT.y1 = y1;
         tickT.y2 = this.bottom;
         tickT.appendTo(g);
+        console.log('hey', time);
       })
       height = height / 2;
       y1 += height;
     });
+    g.append('circle').attr('r', 20);
   }
 }
 
@@ -182,5 +186,28 @@ export class DayTemplate {
       rectT.fill = dateToColor(halfHour);
       const rect = rectT.appendTo(svg);
     });
+    return svg;
+  }
+}
+
+
+export class HoursGridTemplate {
+  yellow = '#fcff9e';
+  orange = '#c67700';
+  date : Date = new Date();
+
+  appendTo(g : any) {
+
+    const dayT = new DayTemplate();
+    dayT.date = this.date;
+    dayT.colorGradient = d3.scaleLinear([0, 100], [this.orange, this.yellow]);
+    const svg = dayT.appendTo(g);
+
+    const ticksT = new TicksTemplate();
+    //ticksT.date = this.date;
+    ticksT.appendTo(svg);
+    console.log('svg', svg.node());
+
+    
   }
 }
