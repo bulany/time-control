@@ -54,14 +54,13 @@ export class TickTemplate {
   constructor() { }
 
   appendTo(g: any) {
-    console.log('appending line', this.x);
-    g.append('circle').attr('r', 3).attr('fill', 'blue').attr('cx', this.x);
-    return g.append('line')
+    const line = g.append('line')
       .attr('x1', this.x)
       .attr('x2', this.x)
       .attr('y1', this.y1)
       .attr('y2', this.y2)
       .attr('stroke', this.stroke);
+    return line;
   }
 }
 
@@ -96,12 +95,10 @@ export class TicksTemplate {
         tickT.y1 = y1;
         tickT.y2 = this.bottom;
         tickT.appendTo(g);
-        console.log('hey', time);
       })
       height = height / 2;
       y1 += height;
     });
-    g.append('circle').attr('r', 20);
   }
 }
 
@@ -205,6 +202,9 @@ export class HoursGridTemplate {
 
     const ticksT = new TicksTemplate();
     //ticksT.date = this.date;
+    ticksT.top = 0;
+    ticksT.bottom = 40;
+    ticksT.steps = [6, 3, 1];
     ticksT.appendTo(svg);
     console.log('svg', svg.node());
 
