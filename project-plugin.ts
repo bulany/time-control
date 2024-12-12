@@ -2,7 +2,7 @@ import { Plugin } from 'obsidian';
 import * as d3 from 'd3'
 import calendarHeatmap from './calendar-heatmap';
 import moment from 'moment';
-import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate, HoursGridTemplate } from 'd4'
+import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate, HoursGridTemplate, HoursBarTemplate } from 'd4'
 
 interface HeatmapData {
   date: Date;
@@ -159,6 +159,8 @@ export class ProjectPlugin {
       this.drawSurroundingProgress(el, startDate, endDate);
       this.drawGithubProgress(el, startDate, endDate);
       this.drawTodayProgress(el);
+      const hoursBarT = new HoursBarTemplate();
+      hoursBarT.appendTo(el);
       
 
       // Find the first day of the year of the start date

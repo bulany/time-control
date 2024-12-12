@@ -20,7 +20,7 @@ export class SvgTemplate {
       .attr('y', this.y)
       .attr('width', this.width)
       .attr('height', this.height)
-      .attr('viewport', `[0 0 ${this.xUnits} ${this.yUnits}]`);
+     // .attr('viewBox', `0 0 ${this.xUnits} ${this.yUnits}`);
   }
 }
 
@@ -209,5 +209,37 @@ export class HoursGridTemplate {
     console.log('svg', svg.node());
 
     
+  }
+}
+
+export class HoursBarTemplate {
+
+  appendTo(el : HTMLElement) {
+    console.log('hey')
+    const now = new Date();
+    const d1 = d3.timeDay.floor(now);
+    const d2 = d3.timeDay.offset(d1, 1);
+    const x = d3.scaleLinear([d1, d2], [0, 100]);
+
+    const sel = d3.select(el);
+
+    const svg = sel.append('svg')
+      .attr('width', '100%')
+      .attr('height', '20px')
+      .style('background', 'steelblue')
+      .attr('viewBox', `0, 0, 100, 100`);
+
+    svg.append('line')
+      .attr('x1', 0)
+      .attr('x2', x(now))
+      .attr('y1', 50)
+      .attr('y2', 50)
+      .attr('stoke', 'black')
+
+    svg.append('circle')
+      .attr('r', 40)
+      .attr('cx', 50)
+
+    return svg;
   }
 }
