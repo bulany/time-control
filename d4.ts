@@ -223,23 +223,68 @@ export class HoursBarTemplate {
 
     const sel = d3.select(el);
 
-    const svg = sel.append('svg')
+    const mRect = s => s.append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
       .attr('width', '100%')
-      .attr('height', '20px')
+      .attr('height', '100%')
+    
+
+    const mCirc = s => s.append('circle')
+      .attr('cx', '50%')
+      .attr('cy', '50%')
+      .attr('r', 4)
+      .attr('fill', 'white')
+    
+    const mSvg = (s, x, y, w, h) => 
+    {
+      const out = s.append('svg')
+        .attr('viewBox', `${x} ${y} ${w} ${h}`) 
+        .attr('width', '50px')
+        .attr('height', '50px')
+        .style('margin', '20px')
+        
+      mRect(out)
+      mCirc(out)
+      return out
+    }
+
+    const svg1 = mSvg(sel, 0, 0, 100, 100);
+    const svg2 = mSvg(sel, 0, 0, 10, 10);
+    const svg3 = mSvg(sel, -5, -5, 10, 10);
+
+
+
+
+    const div = sel.append('div')
+      .style('width', '100%')
+      .style('height', '40px')
+
+    const svg = div.append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%')
       .style('background', 'steelblue')
-      .attr('viewBox', `0, 0, 100, 100`);
+      .attr('viewBox', '0 0 100 100');
 
     svg.append('line')
       .attr('x1', 0)
-      .attr('x2', x(now))
       .attr('y1', 50)
+      .attr('x2', x(now))
       .attr('y2', 50)
-      .attr('stoke', 'black')
+      .attr('stroke', 'green')
 
     svg.append('circle')
       .attr('r', 40)
       .attr('cx', 50)
+      .attr('cy', 50)
+
+    svg.append('circle')
+      .attr('r', 40)
+      .attr('cx', x(now))
+      .attr('cy', 50)
+      .attr('fill', 'red');
 
     return svg;
   }
 }
+
