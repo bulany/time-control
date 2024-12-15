@@ -342,7 +342,31 @@ export class SaturdayTemplate {
 
     return svg;
   }
+}
 
+export function draw_2024_12_15(el : HTMLElement) {
+
+
+  {
+    const svg = d3.select(el).append('svg');
+    svg.append('circle')
+      .attr('r', 10);
+    svg.append('text')
+      .attr('x', 50)
+      .attr('y', 50)
+      .text('default text stroke is black');
+      
+    svg.append('text')
+      .attr('x', 50)
+      .attr('y', 100)
+      .text('default svg dimension: 300x150');
+
+    svg.append('circle')
+      .attr('r', 5)
+      .attr('cx', 150)
+      .attr('cy', 75)
+      .attr('fill', 'red')
+  }
 
 }
 
