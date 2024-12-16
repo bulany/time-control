@@ -345,8 +345,6 @@ export class SaturdayTemplate {
 }
 
 export function draw_2024_12_15(el : HTMLElement) {
-
-
   {
     const svg = d3.select(el).append('svg');
     svg.append('circle')
@@ -355,7 +353,7 @@ export function draw_2024_12_15(el : HTMLElement) {
       .attr('x', 50)
       .attr('y', 50)
       .text('default text stroke is black');
-      
+
     svg.append('text')
       .attr('x', 50)
       .attr('y', 100)
@@ -367,6 +365,27 @@ export function draw_2024_12_15(el : HTMLElement) {
       .attr('cy', 75)
       .attr('fill', 'red')
   }
+}
+
+
+export function draw_2024_12_16(el : HTMLElement) {
+  const sel = d3.select(el);
+  const svg = sel.append('svg');
+
+  const xTicks = d3.ticks(0, 300, 10);
+  const yTicks = d3.ticks(0, 150, 10);
+  const data = xTicks.map((x, i) => { return {x: x, y: yTicks[i]}});
+  svg.selectAll('text')
+    .data(data)
+    .join('text')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
+      .text(d => `(${d.x},${d.y})`)
+
+  svg.append('text')
+    .text('default svg dim is 300x150');
+
+  return svg;
 
 }
 

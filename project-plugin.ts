@@ -4,7 +4,8 @@ import calendarHeatmap from './calendar-heatmap';
 import moment from 'moment';
 import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate, HoursGridTemplate, HoursBarTemplate,
   SaturdayTemplate,
-  draw_2024_12_15
+  draw_2024_12_15,
+  draw_2024_12_16
  } from 'd4'
 
 interface HeatmapData {
@@ -167,6 +168,7 @@ export class ProjectPlugin {
       const saturdayT = new SaturdayTemplate();
       saturdayT.appendTo(el);
       draw_2024_12_15(el);
+      draw_2024_12_16(el);
       
 
       // Find the first day of the year of the start date
