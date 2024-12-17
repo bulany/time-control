@@ -386,6 +386,28 @@ export function draw_2024_12_16(el : HTMLElement) {
     .text('default svg dim is 300x150');
 
   return svg;
+}
 
+export function draw_2024_12_17(el : HTMLElement) {
+  const width = 100;
+  const height = 100;
+  const margin = 5;
+  const vb_data = [
+    null,
+    '0, 0, 100, 100',
+    '0, -20, 100, 100',
+    '0, 0, 300, 150'
+  ];
+
+  const div = d3.select(el).append('div');
+  div.selectAll('svg')
+    .data(vb_data)
+    .join('svg')
+      .attr('viewBox', d => d)
+      .attr('width', width + 'px')
+      .attr('height', height + 'px')
+      .style('margin', margin + 'px')
+      .append('circle')
+        .attr('r', 10)
 }
 
