@@ -411,3 +411,32 @@ export function draw_2024_12_17(el : HTMLElement) {
         .attr('r', 10)
 }
 
+export function draw_2024_12_18(el : HTMLElement) {
+
+  const width = 100;
+  const height = 100;
+  const margin = 5;
+  const vb1 = [0, 0, width, height];
+  const vb2 = [-20, -20, width, height];
+  const vb3 = [-50, -50, width, height];
+  const s = (d : Array<number>) => `${d[0]} ${d[1]} ${d[2]} ${d[3]}`
+  const px = (d : any) => `${d}px`
+  const vb_data = [null, s(vb1), s(vb2), s(vb3)];
+  const div = d3.select(el).append('div');
+
+  const svg = div.selectAll('svg')
+    .data(vb_data)
+    .join('svg')
+      .attr('viewBox', d => d)
+      .attr('width', px(width))
+      .attr('height', px(height))
+      .style('margin', px(margin));
+
+  svg.append('text')
+    .text('hello world');
+  
+  svg.append('circle')
+    .attr('r', 5);
+  
+}
+
