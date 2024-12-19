@@ -440,3 +440,41 @@ export function draw_2024_12_18(el : HTMLElement) {
   
 }
 
+export function draw_2024_12_19(el : HTMLElement) {
+  const px = (d : any) => `${d}px`;
+  const pc = (d : any) => `${d}%`;
+  const s = (d : Array<number>) => `${d[0]} ${d[1]} ${d[2]} ${d[3]}`
+
+  const width = 100;
+  const height = 40;
+  const padding = 2;
+  const vb_data = [];
+  vb_data.push({vb: null, fill: 'green'});
+  vb_data.push({vb: s([0, 0, 100, 100]), fill: 'blue'});
+  vb_data.push({vb: s([-20, -20, 100, 100]), fill: 'red'});
+  vb_data.push({vb: s([-20, 0, 100, 40]), fill: 'steelblue'});
+
+  const div = d3.select(el).append('div')
+    .style('padding', px(padding));
+
+  const svg = div.selectAll('svg')
+    .data(vb_data)
+    .join('svg')
+      .attr('viewBox', d => d.vb)
+      .attr('width', pc(width))
+      .attr('height', px(height))
+      .style('border', d => `1px solid ${d.fill}`);
+
+  svg.append('circle')
+    .attr('cx', pc(100))
+    .attr('cy', px(height/2))
+    .attr('r', px(5))
+    .attr('fill', d => d.fill);
+
+  svg.append('circle')
+    .attr('cx', pc(0))
+    .attr('cy', px(height/2))
+    .attr('r', px(5))
+    .attr('fill', d => d.fill);
+}
+
