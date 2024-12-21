@@ -541,7 +541,51 @@ export function draw_2024_12_20(el : HTMLElement) {
     .attr('cy', height/2)
     .attr('r', 5)
     .attr('fill', d => d.fill);
+}
 
- 
+export function draw_2024_12_21(el : HTMLElement) {
+  const px = (d : any) => `${d}px`;
+  const pc = (d : any) => `${d}%`;
+
+  const width = 100;
+  const height = 40;
+  const padding = 2;
+
+  const div = d3.select(el).append('div')
+    .style('padding', px(padding));
+  
+  const svg = div.append('svg')
+    .attr('width', pc(width))
+    .attr('height', px(height))
+  
+
+  const p1 = {x: 0, y: height/2};
+  const p2 = {x: width, y: height/2};
+
+  const p3 = {x: 0, y: height/3};
+  const p4 = {x: width/2, y: height/3};
+
+  const p5 = {x: width/2, y: 2*(height/3)};
+  const p6 = {x: width, y: 2*(height/3)};
+
+  const p7 = {x: width/4, y: height/5};
+  const p8 = {x: 3*(width/4), y: height/5};
+
+  const appendLine = (selection : any, point1 : any, point2 : any) => {
+    selection.append('line')
+      .attr('x1', pc(point1.x))
+      .attr('y1', point1.y)
+      .attr('x2', pc(point2.x))
+      .attr('y2', point2.y)
+      .attr('stroke', 'black')
+  }
+
+  appendLine(svg, p1, p2);
+  appendLine(svg, p3, p4);
+  appendLine(svg, p5, p6);
+  appendLine(svg, p7, p8);
+
+
+    
 }
 
