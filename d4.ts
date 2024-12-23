@@ -583,9 +583,74 @@ export function draw_2024_12_21(el : HTMLElement) {
   appendLine(svg, p1, p2);
   appendLine(svg, p3, p4);
   appendLine(svg, p5, p6);
-  appendLine(svg, p7, p8);
+  appendLine(svg, p7, p8); 
+}
 
+export function draw_2024_12_22(el : HTMLElement) {
 
-    
+  const px = (d : any) => `${d}px`;
+  const pc = (d : any) => `${d}%`;
+
+  const svgD = {
+    append: 'svg',
+    width: 100,
+    height: 40,
+    parent: null
+  }
+
+  const width = 100;
+  const height = 40;
+  const margin = 2;
+
+  const ticks = d3.ticks(0, width, 5);
+
+  const div = d3.select(el).append('div')
+    .style('margin', px(margin));
+
+  const svg = div.append('svg')
+    .attr('width', pc(width))
+    .attr('height', px(height))
+    .style('border', '1px solid black');
+  
+  svg.selectAll('text')
+    .data(ticks)
+    .join('text')
+      .text(d => d)
+      .attr('x', d => pc(d))
+      .attr('y', height/2)
+      .attr('dominant-baseline', 'middle')
+      .attr('text-anchor', 'middle')
+
+}
+
+export function draw_2024_12_23(el : HTMLElement) {
+
+  const px = (d : any) => `${d}px`;
+  const pc = (d : any) => `${d}%`;
+
+  const margin = 2;
+  const width = 100;
+  const height = 40;
+
+  const x = d3.scaleLinear([0, 100], [2, 98]);
+
+  const div = d3.select(el).append('div')
+    .style('margin', px(margin));
+
+  const svg = div.append('svg')
+    .attr('width', pc(width))
+    .attr('height', px(40))
+    .style('border', '1px solid steelblue')
+  
+  const ticks = [0, 50, 100];
+
+  svg.selectAll('text')
+    .data(ticks)
+    .join('text')
+      .text(d => d)
+      .attr('x', d => pc(x(d)))
+      .attr('y', height/2)
+      .attr('dominant-baseline', 'middle')
+      .attr('text-anchor', 'middle')
 }
 

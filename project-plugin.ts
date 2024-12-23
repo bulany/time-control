@@ -10,7 +10,9 @@ import { SvgTemplate, RectTemplate, TicksTemplate, ToolTip, DayTemplate, HoursGr
   draw_2024_12_18,
   draw_2024_12_19,
   draw_2024_12_20,
-  draw_2024_12_21
+  draw_2024_12_21,
+  draw_2024_12_22,
+  draw_2024_12_23
  } from 'd4'
 
 interface HeatmapData {
@@ -179,6 +181,8 @@ export class ProjectPlugin {
       draw_2024_12_19(el);
       draw_2024_12_20(el);
       draw_2024_12_21(el);
+      draw_2024_12_22(el);
+      draw_2024_12_23(el);
 
       
 
