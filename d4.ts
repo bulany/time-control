@@ -654,3 +654,51 @@ export function draw_2024_12_23(el : HTMLElement) {
       .attr('text-anchor', 'middle')
 }
 
+export function draw_2024_12_24(el : HTMLElement) {
+  const px = (d : any) => `${d}px`;
+  const pc = (d : any) => `${d}%`;
+
+  const margin = 2;
+  const width = 100;
+  const height = 40;
+
+  const x = d3.scaleLinear([0, 100], [2, 98]);
+
+  const yLabel = d3.scaleLinear([0, 100], [height, height/2]);
+  const yLines = d3.scaleLinear([0, 100], [height/2, 0]);
+
+  const div = d3.select(el).append('div')
+    .style('margin', px(margin))
+
+    const svg = div.append('svg')
+    .attr('width', pc(width))
+    .attr('height', px(40))
+    .style('border', '1px solid steelblue')
+  
+  const ticks = [
+    {x: 0, label: true},
+    {x: 25, label: false},
+    {x: 50, label: true},
+    {x: 75, label: false},
+    {x: 100, label: true}
+  ];
+
+  svg.selectAll('text')
+    .data(ticks)
+    .join('text')
+      .text(d => d.label ? d.x : null)
+      .attr('x', d => pc(x(d.x)))
+      .attr('y', yLabel(50))
+      .attr('dominant-baseline', 'middle')
+      .attr('text-anchor', 'middle')
+  
+  svg.selectAll('line')
+    .data(ticks)
+    .join('line')
+      .attr('x1', d => pc(x(d.x)))
+      .attr('x2', d => pc(x(d.x)))
+      .attr('y1', yLines(0))
+      .attr('y2', d => yLines(d.label ? 100 : 50))
+      .attr('stroke', 'black')
+}
+
