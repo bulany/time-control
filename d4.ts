@@ -702,3 +702,69 @@ export function draw_2024_12_24(el : HTMLElement) {
       .attr('stroke', 'black')
 }
 
+export function draw_2024_12_25(el : HTMLElement) {
+  const now = new Date();
+  const d1 = d3.timeDay.floor(now);
+  const d2 = d3.timeDay.offset(d1, 1);
+
+  const ticks = d3.timeHour.range(d1, d2);
+  ticks.push(d2);
+
+  const tickLength = i => {
+    if (i % 6 == 0)
+      return 100;
+    if (i % 3)
+      return 50;
+    return 25;
+  }
+
+  const data = ticks.map((d, i) => {
+    return {
+      length: tickLength(i),
+      text: i % 3 ? d3.timeFormat("%H")(d) : null,
+      date: d
+    }
+  })
+
+  const px = (d : any) => `${d}px`;
+  const pc = (d : any) => `${d}%`;
+
+  const margin = 2;
+  const width = 100;
+  const height = 40;
+
+  const x = d3.scaleLinear([0, width], [0+margin, width-margin]);
+
+  const t = d3.scaleLinear([d1, d2], [0, 100]);
+
+  const yLabel = d3.scaleLinear([0, 100], [height, height/2]);
+  const yLines = d3.scaleLinear([0, 100], [height/2, 0]);
+
+  const div = d3.select(el).append('div')
+    .style('margin', px(margin))
+
+  const svg = div.append('svg')
+  .attr('width', pc(width))
+  .attr('height', px(40))
+  .style('border', '1px solid steelblue')
+
+  svg.selectAll('text')
+  .data(data)
+  .join('text')
+    .text(d => d.text)
+    .attr('x', d => pc(x(t(d.date))))
+    .attr('y', yLabel(50))
+    .attr('dominant-baseline', 'middle')
+    .attr('text-anchor', 'middle')
+
+  svg.selectAll('line')
+  .data(data)
+  .join('line')
+    .attr('x1', d => pc(x(t(d.date))))
+    .attr('x2', d => pc(x(t(d.date))))
+    .attr('y1', yLines(0))
+    .attr('y2', d => yLines(d.length))
+    .attr('stroke', 'black')
+
+}
+
